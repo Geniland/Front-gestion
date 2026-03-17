@@ -13,7 +13,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import axios from 'axios';
+import api from '../../api/axios';
 import SummaryCard from '../cards/SummaryCard.vue';
 
 // Valeurs réactives
@@ -25,12 +25,15 @@ const tauxRecouvrement = ref(0);
 
 const fetchRevenus = async () => {
   try {
-    const response = await axios.get('http://127.0.0.1:8000/api/dashboard/revenue');
+    const response = await api.get('/dashboard/revenue');
+//      console.log("DATA:", response.data);
+// console.log("MOIS:", revenuMois.value);
     if (response.data.success) {
-      revenuJour.value = response.data.revenu_jour;
-      revenuSemaine.value = response.data.revenu_semaine;
-      revenuMois.value = response.data.revenu_mois;
-      revenuAnnee.value = response.data.revenu_annee;
+     revenuJour.value = Number(response.data.revenu_jour);
+      revenuSemaine.value = Number(response.data.revenu_semaine);
+      revenuMois.value = Number(response.data.revenu_mois);
+      revenuAnnee.value = Number(response.data.revenu_annee);
+   
 
       // Calcul simple du taux de recouvrement
       // ici exemple : total payé / total attendu
@@ -40,6 +43,7 @@ const fetchRevenus = async () => {
     }
   } catch (error) {
     console.error('Erreur lors de la récupération des revenus :', error);
+   
   }
 };
 
@@ -49,8 +53,13 @@ onMounted(() => {
 
 // Fonction pour formater en FCFA
 const formatCurrency = (val) => {
-  if (!val) return '0 FCFA';
-  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF' }).format(val);
+  const number = Number(val);
+  if (!number) return '0 FCFA';
+
+  return new Intl.NumberFormat('fr-FR', {
+    style: 'currency',
+    currency: 'XOF'
+  }).format(number);
 };
 </script>
 

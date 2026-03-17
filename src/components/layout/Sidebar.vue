@@ -1,7 +1,7 @@
 <template>
   <div class="sidebar">
     <div class="logo">
-      <img src="../../assets/images/logo.png" alt="Logo" />
+      <img src="../../assets/images/logos.png" alt="Logo" />
       <span>EVENOU TAXE-AFRIQUE</span>
     </div>
     <nav>
