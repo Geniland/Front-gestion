@@ -1,0 +1,18 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background-color: #f1f5f9;
+}
+
+#app {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-dashboard, .icon-users, .icon-taxes, .icon-payments, .icon-tickets, .icon-agents, .icon-collectors, .icon-settings, .icon-risk, .icon-zone, .icon-agent, .icon-fraud {
+  /* Replace with actual icon library classes or SVG icons */
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  background-color: #94a3b8; /* Placeholder color */
+}
