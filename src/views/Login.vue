@@ -81,7 +81,11 @@ export default {
         await auth.login(form);
         router.push('/');
       } catch (err) {
-        error.value = err.response?.data?.message || 'Échec de la connexion. Vérifiez vos identifiants.';
+        if (err.response?.status === 403) {
+          error.value = `Compte bloqué : ${err.response.data.reason || 'Contactez l\'administrateur'}`;
+        } else {
+          error.value = err.response?.data?.message || 'Échec de la connexion. Vérifiez vos identifiants.';
+        }
       } finally {
         loading.value = false;
       }

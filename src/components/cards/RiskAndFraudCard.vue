@@ -14,7 +14,7 @@
         <span>2</span>
       </div>
       <div class="item">
-        <span>Taxues suspects</span>
+        <span>Taxe suspects</span>
         <span>16</span>
       </div>
     </div>

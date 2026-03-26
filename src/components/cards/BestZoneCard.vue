@@ -5,7 +5,7 @@
       <span>Meilleure Zone</span>
     </div>
     <div class="content">
-      <div class="zone">Quintox</div>
+      <div class="zone">Sagbado</div>
       <div class="amount">9.450.000</div>
     </div>
     <div class="footer">

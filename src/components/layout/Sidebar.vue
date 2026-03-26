@@ -6,15 +6,45 @@
     </div>
     <nav>
       <ul>
-       <li class="active"><a href="#"><i class="fas fa-tachometer-alt"></i> Tableau de Bord</a></li>
-      <li><a href="#"><i class="fas fa-users"></i> Contribuables</a></li>
-      <li><a href="#"><i class="fas fa-coins"></i> Taxes</a></li>
-      <li><a href="#"><i class="fas fa-credit-card"></i> Paiements</a></li>
-      <li><a href="#"><i class="fas fa-ticket-alt"></i> Tickets</a></li>
-      <li><a href="#"><i class="fas fa-user-tie"></i> Agents</a></li>
-      <li><a href="#"><i class="fas fa-user-check"></i> Agents Collecteurs</a></li>
-      <li><a href="#"><i class="fas fa-cog"></i> Paramètres</a></li>
-            </ul>
+        <li :class="{ active: $route.name === 'Dashboard' }">
+          <router-link to="/">
+            <i class="fas fa-tachometer-alt"></i> Tableau de Bord
+          </router-link>
+        </li>
+        <li :class="{ active: $route.name === 'Communes' }">
+          <router-link to="/communes">
+            <i class="fas fa-city"></i> Communes
+          </router-link>
+        </li>
+        <li :class="{ active: $route.name === 'Quartiers' }">
+          <router-link to="/quartiers">
+            <i class="fas fa-map-marker-alt"></i> Quartiers
+          </router-link>
+        </li>
+        <li :class="{ active: $route.name === 'Agents' }">
+          <router-link to="/agents">
+            <i class="fas fa-user-tie"></i> Agents
+          </router-link>
+        </li>
+        <li :class="{ active: $route.name === 'TypeTaxes' }">
+          <router-link to="/types-taxes">
+            <i class="fas fa-coins"></i> Taxes
+          </router-link>
+        </li>
+        <!-- <li :class="{ active: $route.name === 'Paiements' }">
+          <router-link to="/paiements">
+            <i class="fas fa-credit-card"></i> Paiements
+          </router-link>
+        </li>
+        <li><a href="#"><i class="fas fa-users"></i> Contribuables</a></li>
+        <li><a href="#"><i class="fas fa-ticket-alt"></i> Tickets</a></li> 
+        <li><a href="#"><i class="fas fa-user-check"></i> Agents Collecteurs</a></li> -->
+        <li :class="{ active: $route.name === 'Settings' }">
+          <router-link to="/settings">
+            <i class="fas fa-cog"></i> Paramètres
+          </router-link>
+        </li>
+      </ul>
     </nav>
   </div>
 </template>

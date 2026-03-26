@@ -42,15 +42,22 @@
             <MapCard />
           </div>
         </Transition>
+
+        <!-- Tableau des contribuables (déplacé ici) -->
+        <Transition name="fade-slide" appear>
+          <div class="grid-item large unpaid-table-container">
+            <UnpaidTaxpayersTable />
+          </div>
+        </Transition>
       </div>
 
       <!-- Colonne de droite (1/3) avec disposition optimisée -->
       <div class="right-column">
         <TransitionGroup name="stagger" tag="div" class="right-column-content">
           <!-- Cartes de risque et performance -->
-          <div key="risk" class="grid-item small">
+          <!-- <div key="risk" class="grid-item small">
             <RiskLevelCard />
-          </div>
+          </div> -->
           
           <div key="zone" class="grid-item small">
             <BestZoneCard />
@@ -65,19 +72,14 @@
             <RiskAndFraudCard />
           </div>
           
-          <!-- Tableau des contribuables -->
-          <div key="unpaid" class="grid-item large">
-            <UnpaidTaxpayersTable />
-          </div>
-          
           <!-- Graphiques supplémentaires -->
-          <div key="atuness" class="grid-item small">
+          <!-- <div key="atuness" class="grid-item small">
             <AtunessChart />
-          </div>
+          </div> -->
           
-          <div key="recovery" class="grid-item small">
+          <!-- <div key="recovery" class="grid-item small">
             <RecoveryRateChart />
-          </div>
+          </div> -->
         </TransitionGroup>
       </div>
     </div>
@@ -188,7 +190,18 @@ export default {
   min-height: 100vh;
   padding: 24px 32px;
   position: relative;
+  overflow-x: hidden;
 }
+
+/* .grid-item {
+  max-width: 100%;
+  box-sizing: border-box;
+} */
+
+/* .left-column,
+.right-column {
+  min-width: 0;
+} */
 
 /* Header amélioré */
 .dashboard-header {

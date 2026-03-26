@@ -1,7 +1,7 @@
 <template>
   <div class="revenue-chart">
     <div class="chart-header">
-      <h3 class="chart-title">Prévision des Recettes 2024</h3>
+      <h3 class="chart-title">Prévision des Recettes 2026</h3>
       <div class="chart-legend">
         <span class="legend-item">
           <span class="legend-color" style="background: linear-gradient(180deg, #10b981, #059669)"></span>

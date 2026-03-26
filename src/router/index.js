@@ -2,6 +2,12 @@ import { createRouter, createWebHistory } from 'vue-router';
 import DashboardLayout from '../views/DashboardLayout.vue';
 import Dashboard from '../views/Dashboard.vue';
 import Login from '../views/Login.vue';
+import Communes from '../views/Communes.vue';
+import Agents from '../views/Agents.vue';
+import TypeTaxes from '../views/TypeTaxes.vue';
+import Quartiers from '../views/Quartiers.vue';
+import Paiements from '../views/Paiements.vue';
+import Settings from '../views/Settings.vue';
 import auth from '../store/auth';
 
 const routes = [
@@ -21,7 +27,36 @@ const routes = [
         name: 'Dashboard',
         component: Dashboard,
       },
-      // Vous pouvez ajouter d'autres routes ici
+      {
+        path: 'communes',
+        name: 'Communes',
+        component: Communes,
+      },
+      {
+        path: 'agents',
+        name: 'Agents',
+        component: Agents,
+      },
+      {
+        path: 'types-taxes',
+        name: 'TypeTaxes',
+        component: TypeTaxes,
+      },
+      {
+        path: 'quartiers',
+        name: 'Quartiers',
+        component: Quartiers,
+      },
+      {
+        path: 'paiements',
+        name: 'Paiements',
+        component: Paiements,
+      },
+      {
+        path: 'settings',
+        name: 'Settings',
+        component: Settings,
+      },
     ],
   },
 ];

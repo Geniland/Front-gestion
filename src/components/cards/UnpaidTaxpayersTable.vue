@@ -3,44 +3,88 @@
     <div class="header">
       <span>Contribuables Impayés</span>
     </div>
+
     <table>
       <thead>
         <tr>
           <th>ID</th>
-          <th>Nom</th>
-          <th>Zone</th>
-          <th>Serats</th>
+          <th>Contribuable</th>
+          <th>Taxe</th>
+          <th>Agent</th>
+          <th>Statut</th>
         </tr>
       </thead>
+
       <tbody>
-        <tr v-for="taxpayer in taxpayers" :key="taxpayer.id">
-          <td>{{ taxpayer.id }}</td>
-          <td>{{ taxpayer.name }}</td>
-          <td>{{ taxpayer.zone }}</td>
-          <td><span class="status" :class="taxpayer.status.class">{{ taxpayer.status.text }}</span></td>
+        <tr v-for="tax in taxes" :key="tax.id">
+          <td>{{ tax.id }}</td>
+          <td>{{ tax.contribuable }}</td>
+          <td>{{ tax.taxe }}</td>
+          <td>{{ tax.agent || 'N/A' }}</td>
+
+          <td>
+            <span
+              class="status"
+              :class="getStatusClass(tax.statut)"
+            >
+              {{ formatStatus(tax.statut) }}
+            </span>
+          </td>
         </tr>
       </tbody>
     </table>
+
+    <!-- Si vide -->
+    <div v-if="taxes.length === 0" class="empty">
+      Aucune taxe impayée
+    </div>
   </div>
 </template>
 
 <script>
+import api from '../../api/axios';
+
 export default {
-  name: 'UnpaidTaxpayersTable',
+  name: "UnpaidTaxpayersTable",
+
   data() {
     return {
-      taxpayers: [
-        { id: 'BGZ-2002', name: 'Adidogomé', zone: 'S', status: { text: 'En attente', class: 'pending' } },
-        { id: 'AGT-447', name: 'Koffi', zone: 'GDL', status: { text: 'En attente', class: 'pending' } },
-        { id: 'AGT-03', name: 'Kodjo', zone: 'AD.UA', status: { text: 'En attente', class: 'pending' } },
-        { id: 'AGF-05', name: 'Amouzouh', zone: 'G9.G', status: { text: 'En attente', class: 'pending' } },
-        { id: 'AGT-12', name: 'Belair', zone: 'A', status: { text: 'En attente', class: 'pending' } },
-      ],
+      taxes: [],
     };
+  },
+
+  mounted() {
+    this.fetchTaxes();
+  },
+
+  methods: {
+    async fetchTaxes() {
+      try {
+        const res = await api.get(
+          "/dashboard/top-taxes"
+        );
+
+        // 🔥 on récupère les taxes impayées
+        this.taxes = res.data.taxes_impayees;
+      } catch (error) {
+        console.error(error);
+      }
+    },
+
+    formatStatus(status) {
+      if (status === "en_attente") return "En attente";
+      if (status === "payee") return "Payée";
+      return "Impayée";
+    },
+
+    getStatusClass(status) {
+      if (status === "en_attente") return "pending";
+      if (status === "payee") return "paid";
+      return "unpaid";
+    },
   },
 };
 </script>
-
 <style scoped>
 .unpaid-taxpayers-table {
   background-color: #fff;
@@ -73,5 +117,22 @@ th, td {
 
 .status.pending {
   background-color: #f59e0b;
+}
+
+/* états supplémentaires */
+.status.paid {
+  background-color: #10b981;
+}
+
+.status.unpaid {
+  background-color: #ef4444;
+}
+
+/* message vide */
+.empty {
+  text-align: center;
+  padding: 15px;
+  color: #6b7280;
+  font-size: 14px;
 }
 </style>
