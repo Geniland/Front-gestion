@@ -4,7 +4,7 @@
       <span></span>
       <span>Tableau de bord</span>
     </div>
-    <div class="item">
+    <!-- <div class="item">
       <span>Paleés</span>
       <span>200 Jol</span>
     </div>
@@ -17,7 +17,7 @@
     </div>
     <div class="item">
       <span>32,500,000</span>
-    </div>
+    </div> -->
   </div>
 </template>
 

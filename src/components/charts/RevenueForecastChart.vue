@@ -1,7 +1,7 @@
 <template>
   <div class="revenue-chart">
     <div class="chart-header">
-      <h3 class="chart-title">Prévision des Recettes 2026</h3>
+      <h3 class="chart-title">Prévision des Recettes 2027</h3>
       <div class="chart-legend">
         <span class="legend-item">
           <span class="legend-color" style="background: linear-gradient(180deg, #10b981, #059669)"></span>
@@ -69,6 +69,7 @@ export default {
           {
             label: 'Prévision des Recettes',
             data: [40, 39, 45, 52, 58, 63, 68, 72, 75, 78, 82, 85],
+            //  data: [],
             borderColor: '#10b981',
             backgroundColor: (context) => {
               const ctx = context.chart.ctx;

@@ -4,20 +4,56 @@
       <i class="icon-zone"></i>
       <span>Meilleure Zone</span>
     </div>
+
     <div class="content">
-      <div class="zone">Sagbado</div>
-      <div class="amount">9.450.000</div>
+      <div class="zone">{{ bestZone.zone }}</div>
+      <div class="amount">{{ formatCurrency(bestZone.montant) }}</div>
     </div>
+
     <div class="footer">
-      <span>53 rartenes tesies</span>
-      <span>+ 15%</span>
+      <span>{{ bestZone.payements }} paiement(s) dans la zone</span>
     </div>
   </div>
 </template>
 
 <script>
+import api from "../../api/axios";
+
 export default {
-  name: 'BestZoneCard',
+  name: "BestZoneCard",
+  data() {
+    return {
+      bestZone: {
+        zone: "Chargement...",
+        montant: 0,
+        payements: 0,
+      },
+    };
+  },
+
+  mounted() {
+    this.getBestZone();
+  },
+
+  methods: {
+    async getBestZone() {
+      try {
+        const res = await api.get("/dashboard/best-zone", {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+
+        this.bestZone = res.data;
+      } catch (error) {
+        console.error("Erreur best zone:", error);
+      }
+    },
+
+    formatCurrency(value) {
+      return new Intl.NumberFormat("fr-FR").format(value) + " FCFA";
+    },
+  },
 };
 </script>
 

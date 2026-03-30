@@ -32,14 +32,9 @@ const fetchRevenus = async () => {
      revenuJour.value = Number(response.data.revenu_jour);
       revenuSemaine.value = Number(response.data.revenu_semaine);
       revenuMois.value = Number(response.data.revenu_mois);
-      revenuAnnee.value = Number(response.data.revenu_annee);
-   
+      revenuAnnee.value = Number(response.data.revenu_annee); 
+      tauxRecouvrement.value = Number(response.data.taux_recouvrement);
 
-      // Calcul simple du taux de recouvrement
-      // ici exemple : total payé / total attendu
-      // si tu as une API spécifique pour le taux, utilise-la
-      const totalAttendu = 1000000; // remplace par ta logique réelle
-      tauxRecouvrement.value = ((revenuAnnee.value / totalAttendu) * 100).toFixed(1);
     }
   } catch (error) {
     console.error('Erreur lors de la récupération des revenus :', error);
