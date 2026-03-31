@@ -57,9 +57,10 @@
                   <label>Logo de la plateforme</label>
                   <div class="logo-upload">
                     <div class="logo-preview">
-                      <img src="../assets/images/logo.png" alt="Logo" />
+                      <img :src="logoPreview || getLogoUrl(settings.general.logo_path)" alt="Logo" />
                     </div>
-                    <button class="btn-outline-sm">Changer le logo</button>
+                    <input type="file" ref="logoInput" @change="onLogoChange" style="display: none" accept="image/*" />
+                    <button class="btn-outline-sm" @click="$refs.logoInput.click()">Changer le logo</button>
                   </div>
                 </div>
               </div>
@@ -112,11 +113,13 @@
   <section class="settings-section mt-8">
     <h3><i class="fas fa-shield-alt"></i> Politique de Sécurité</h3>
     <div class="form-group checkbox-group">
-      <label class="switch-label">
-        <input type="checkbox" v-model="settings.security.twoFactor" />
-        <span class="slider"></span>
-        <span style="color: #1e293b;">Forcer l'authentification à deux facteurs (2FA)</span>
-      </label>
+      <div class="security-option">
+        <label class="switch">
+          <input type="checkbox" v-model="settings.security.twoFactor" />
+          <span class="slider"></span>
+        </label>
+        <span class="option-label">Forcer l'authentification à deux facteurs (2FA)</span>
+      </div>
     </div>
     <div class="form-group mt-4">
       <label for="session-timeout" style="color: #1e293b; font-weight: 600;">Expiration des sessions (minutes)</label>
@@ -211,7 +214,10 @@
                     <h4>Sauvegarde Complète</h4>
                     <p>Télécharger un dump SQL de la base de données actuelle.</p>
                   </div>
-                  <button class="btn-primary">Lancer le backup</button>
+                  <button class="btn-primary" @click="downloadBackup" :disabled="backingUp">
+                    <i v-if="backingUp" class="fas fa-spinner fa-spin mr-2"></i>
+                    {{ backingUp ? 'Génération...' : 'Lancer le backup' }}
+                  </button>
                 </div>
                 <div class="action-card mt-4">
                   <i class="fas fa-file-import"></i>
@@ -242,18 +248,23 @@
 </template>
 
 <script>
-import { ref, reactive } from 'vue';
+import { ref, reactive, onMounted } from 'vue';
+import api from '../api/axios';
 
 export default {
   name: 'Settings',
   setup() {
     const activeTab = ref('general');
     const saving = ref(false);
+    const backingUp = ref(false);
     const selectedTemplate = ref('receipt');
+    const logoInput = ref(null);
+    const logoPreview = ref(null);
+    const logoFile = ref(null);
 
     const tabs = [
       { id: 'general', label: 'Général', icon: 'fas fa-cog' },
-      { id: 'security', label: 'Sécurité & Logs', icon: 'fas fa-shield-alt' }, // Changé 'securité' → 'security'
+      { id: 'security', label: 'Sécurité & Logs', icon: 'fas fa-shield-alt' },
       { id: 'finances', label: 'Finances & Taxes', icon: 'fas fa-money-bill-wave' },
       { id: 'notifications', label: 'Notifications', icon: 'fas fa-bell' },
       { id: 'system', label: 'Système', icon: 'fas fa-server' },
@@ -263,11 +274,12 @@ export default {
       general: {
         app_name: 'E-TAXE AFRIQUE',
         app_slogan: 'Gestion de Dashboard de Mairie',
-        currency: 'XOF'
+        currency: 'XOF',
+        logo_path: ''
       },
       security: {
-        twoFactor: false,        // Changé two_factor → twoFactor
-        sessionTimeout: 60        // Changé session_timeout → sessionTimeout
+        twoFactor: false,
+        sessionTimeout: 60
       },
       finances: {
         tmoney_enabled: true,
@@ -282,25 +294,110 @@ export default {
       }
     });
 
-    const auditLogs = ref([
-      { id: 1, user: 'Admin Marc', action: 'Modification Taxe', type: 'update', module: 'Types Taxes', date: '18/03/2024 10:45', ip: '192.168.1.15' },
-      { id: 2, user: 'Agent Koffi', action: 'Suppression Contribuable', type: 'delete', module: 'Contribuables', date: '18/03/2024 09:12', ip: '192.168.1.22' },
-      { id: 3, user: 'Admin Marc', action: 'Connexion', type: 'login', module: 'Auth', date: '18/03/2024 08:00', ip: '192.168.1.15' },
-      { id: 4, user: 'Maire Jean', action: 'Export Rapport', type: 'export', module: 'Rapports', date: '17/03/2024 16:30', ip: '10.0.0.5' },
-    ]);
+    const auditLogs = ref([]);
+
+    const fetchSettings = async () => {
+      try {
+        const response = await api.get('/settings');
+        // Merge with defaults to ensure all keys exist
+        Object.keys(response.data).forEach(section => {
+          if (settings[section]) {
+            Object.assign(settings[section], response.data[section]);
+          }
+        });
+      } catch (error) {
+        console.error('Erreur lors du chargement des paramètres:', error);
+      }
+    };
+
+    const fetchAuditLogs = async () => {
+      try {
+        const response = await api.get('/audit-logs');
+        auditLogs.value = response.data;
+      } catch (error) {
+        console.error('Erreur lors du chargement des logs d\'audit:', error);
+      }
+    };
+
+    onMounted(() => {
+      fetchSettings();
+      fetchAuditLogs();
+    });
 
     const saveAllSettings = async () => {
       saving.value = true;
-      // Simulation d'appel API
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      saving.value = false;
-      alert('Tous les paramètres ont été mis à jour avec succès !');
+      try {
+        const formData = new FormData();
+        // Add settings as a JSON string or individually
+        formData.append('settings', JSON.stringify(settings));
+        
+        if (logoFile.value) {
+          formData.append('logo', logoFile.value);
+        }
+
+        await api.post('/settings', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+        
+        alert('Tous les paramètres ont été mis à jour avec succès !');
+        // Refresh to get updated logo path if changed
+        fetchSettings();
+      } catch (error) {
+        console.error('Erreur lors de l\'enregistrement des paramètres:', error);
+        alert('Une erreur est survenue lors de l\'enregistrement.');
+      } finally {
+        saving.value = false;
+      }
     };
 
-    // Ajout de la fonction formatDate manquante
+    const downloadBackup = async () => {
+      backingUp.value = true;
+      try {
+        const response = await api.get('/settings/backup', {
+          responseType: 'blob'
+        });
+        
+        // Create a download link for the blob
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        const filename = `backup-${new Date().toISOString().split('T')[0]}.sql`;
+        link.setAttribute('download', filename);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+      } catch (error) {
+        console.error('Erreur lors du téléchargement du backup:', error);
+        alert('Une erreur est survenue lors de la génération du backup.');
+      } finally {
+        backingUp.value = false;
+      }
+    };
+
+    const onLogoChange = (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        logoFile.value = file;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          logoPreview.value = event.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+
+    const getLogoUrl = (path) => {
+      if (!path) return '/src/assets/images/logo.png';
+      if (path.startsWith('http')) return path;
+      return `${api.defaults.baseURL.replace('/api', '')}/storage/${path}`;
+    };
+
     const formatDate = (date) => {
       if (!date) return '-';
-      return date; // Retourne la date telle quelle pour l'instant
+      return date;
     };
 
     return {
@@ -309,9 +406,15 @@ export default {
       settings,
       auditLogs,
       saving,
+      backingUp,
       selectedTemplate,
+      logoInput,
+      logoPreview,
+      onLogoChange,
+      getLogoUrl,
       saveAllSettings,
-      formatDate  // N'oublie pas d'ajouter formatDate ici !
+      downloadBackup,
+      formatDate
     };
   }
 };
@@ -399,18 +502,23 @@ export default {
 }
 
 /* Style pour le switch avec effet */
-.switch-label {
+.security-option {
   display: flex;
   align-items: center;
   gap: 12px;
-  cursor: pointer;
   padding: 8px;
   border-radius: 8px;
   transition: background-color 0.2s ease;
 }
 
-.switch-label:hover {
+.security-option:hover {
   background-color: #f8fafc;
+}
+
+.option-label {
+  color: #1e293b;
+  font-weight: 500;
+  cursor: pointer;
 }
 
 /* Style pour l'input number avec effet de survol */
@@ -504,6 +612,12 @@ export default {
   gap: 12px;
   padding-bottom: 15px;
   border-bottom: 1px solid #f1f5f9;
+}
+
+.table-container {
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid #f1f5f9;
 }
 
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
