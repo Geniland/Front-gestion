@@ -10,7 +10,7 @@
         <button @click="handleLogout" class="logout-btn" title="Se déconnecter">
           <i class="fas fa-sign-out-alt"></i>
         </button>
-        <i class="fas fa-cog" @click="$router.push('/settings')"></i>
+        <i class="fas fa-cog" @click="$router.push('/admin/settings')"></i>
         
         <!-- Cloche de notification -->
         <div class="notification-wrapper">

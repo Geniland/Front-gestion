@@ -43,7 +43,7 @@
       </form>
 
       <div class="footer">
-        © 2024 MAIRIE GOLF 7 - Tous droits réservés
+        © 2026 MAIRIE GOLFE 7 - Tous droits réservés
       </div>
     </div>
   </div>
@@ -79,7 +79,7 @@ export default {
       error.value = null;
       try {
         await auth.login(form);
-        router.push('/');
+        router.push('/admin');
       } catch (err) {
         if (err.response?.status === 403) {
           error.value = `Compte bloqué : ${err.response.data.reason || 'Contactez l\'administrateur'}`;

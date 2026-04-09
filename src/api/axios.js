@@ -11,7 +11,8 @@ const api = axios.create({
 
 // Intercepteur pour ajouter le token à chaque requête
 api.interceptors.request.use(config => {
-  const token = localStorage.getItem('token');
+  // On priorise le token admin, sinon le token site public
+  const token = localStorage.getItem('token') || localStorage.getItem('site_token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -25,7 +26,15 @@ api.interceptors.response.use(response => response, error => {
   if (error.response && error.response.status === 401) {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    window.location.href = '/login';
+    localStorage.removeItem('site_token');
+    localStorage.removeItem('site_user');
+    
+    // Redirection selon le contexte
+    if (window.location.pathname.startsWith('/admin')) {
+      window.location.href = '/admin-login';
+    } else {
+      window.location.href = '/login';
+    }
   }
   return Promise.reject(error);
 });
