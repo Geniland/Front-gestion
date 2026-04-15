@@ -22,18 +22,32 @@ api.interceptors.request.use(config => {
 });
 
 // Intercepteur pour gérer l'expiration du token (401)
+let isSessionExpiredAlertShown = false;
+
 api.interceptors.response.use(response => response, error => {
   if (error.response && error.response.status === 401) {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    localStorage.removeItem('site_token');
-    localStorage.removeItem('site_user');
-    
-    // Redirection selon le contexte
-    if (window.location.pathname.startsWith('/admin')) {
-      window.location.href = '/admin-login';
-    } else {
-      window.location.href = '/login';
+    // Éviter les alertes multiples
+    if (!isSessionExpiredAlertShown) {
+      isSessionExpiredAlertShown = true;
+      
+      // Nettoyage immédiat du stockage
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      localStorage.removeItem('site_token');
+      localStorage.removeItem('site_user');
+
+      // Notification utilisateur
+      alert("Votre session a expiré. Veuillez vous reconnecter.");
+      
+      // Redirection selon le contexte
+      if (window.location.pathname.startsWith('/admin')) {
+        window.location.href = '/admin-login';
+      } else {
+        window.location.href = '/login';
+      }
+      
+      // Réinitialiser le flag après un court instant au cas où
+      setTimeout(() => { isSessionExpiredAlertShown = false; }, 5000);
     }
   }
   return Promise.reject(error);

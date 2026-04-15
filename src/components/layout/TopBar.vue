@@ -98,8 +98,8 @@ export default {
   setup() {
     const router = useRouter();
     
-    const userName = computed(() => auth.user.user?.nom || 'Utilisateur');
-    const role = computed(() => auth.user.user?.role || 'Role');
+    const userName = computed(() => auth.user.value?.nom || 'Utilisateur');
+    const role = computed(() => auth.user.value?.role || 'Role');
     
     const currentDate = computed(() => {
       const options = { day: 'numeric', month: 'long', year: 'numeric' };
@@ -124,6 +124,7 @@ export default {
     };
 
     const fetchNotifications = async () => {
+      if (!auth.isAuthenticated.value) return;
       try {
         const response = await api.get('/dashboard/risk-fraud');
         if (response.data.success) {
@@ -147,9 +148,9 @@ export default {
     const showProfileModal = ref(false);
     const updatingProfile = ref(false);
     const profileForm = ref({
-      nom: auth.user.user?.nom || '',
-      email: auth.user.user?.email || '',
-      telephone: auth.user.user?.telephone || '',
+      nom: auth.user.value?.nom || '',
+      email: auth.user.value?.email || '',
+      telephone: auth.user.value?.telephone || '',
       password: '',
       password_confirmation: ''
     });
@@ -158,9 +159,9 @@ export default {
       showProfileModal.value = !showProfileModal.value;
       if (showProfileModal.value) {
         profileForm.value = {
-          nom: auth.user.user?.nom || '',
-          email: auth.user.user?.email || '',
-          telephone: auth.user.user?.telephone || '',
+          nom: auth.user.value?.nom || '',
+          email: auth.user.value?.email || '',
+          telephone: auth.user.value?.telephone || '',
           password: '',
           password_confirmation: ''
         };
@@ -174,8 +175,8 @@ export default {
         if (response.data.success) {
           // Update local store user
           const updatedUser = response.data.agent;
-          auth.user.user = updatedUser;
-          localStorage.setItem('user', JSON.stringify(auth.user));
+          auth.state.user = updatedUser;
+          localStorage.setItem('user', JSON.stringify(updatedUser));
           
           alert('Profil mis à jour avec succès');
           showProfileModal.value = false;

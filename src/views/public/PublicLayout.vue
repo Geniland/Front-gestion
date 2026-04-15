@@ -86,8 +86,8 @@
             </template>
 
             <!-- Mobile Menu Toggle -->
-            <button @click="mobileMenuOpen = !mobileMenuOpen" class="lg:hidden p-2.5 text-gray-500 hover:bg-gray-50 rounded-xl transition-all">
-              <i class="fas" :class="mobileMenuOpen ? 'fa-times' : 'fa-bars-staggered'"></i>
+            <button @click="mobileMenuOpen = !mobileMenuOpen" class="lg:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-all border border-gray-200">
+              <i class="fas fa-fw" :class="mobileMenuOpen ? 'fa-times' : 'fa-bars'"></i>
             </button>
           </div>
         </div>
@@ -213,7 +213,7 @@ const notifications = ref([]);
 const unreadCount = computed(() => notifications.value.length);
 
 async function fetchNotifications() {
-  if (!isAuthenticated.value) return;
+  if (!isAuthenticated.value || !userAuth.token.value) return;
   
   try {
     const [taxesRes, requestsRes] = await Promise.all([
@@ -291,21 +291,46 @@ async function handleLogout() {
 
 <style scoped>
 .nav-link {
-  @apply text-sm font-bold text-gray-500 hover:text-mairie-blue transition-all relative py-2;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #6b7280; /* text-gray-500 */
+  transition-property: all;
+  position: relative;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+.nav-link:hover {
+  color: #0056b3; /* mairie-blue */
 }
 .nav-link.router-link-active {
-  @apply text-mairie-blue;
+  color: #0056b3; /* mairie-blue */
 }
 .nav-link.router-link-active::after {
   content: '';
-  @apply absolute bottom-0 left-0 w-full h-0.5 bg-mairie-blue rounded-full;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #0056b3;
+  border-radius: 9999px;
 }
 
 .mobile-nav-link {
-  @apply block py-4 px-6 rounded-2xl font-black text-gray-700 hover:bg-gray-50 hover:text-mairie-blue transition-all;
+  display: block;
+  padding: 1rem 1.5rem;
+  border-radius: 1rem;
+  font-weight: 900;
+  color: #374151; /* text-gray-700 */
+  transition-property: all;
+}
+.mobile-nav-link:hover {
+  background-color: #f9fafb; /* gray-50 */
+  color: #0056b3; /* mairie-blue */
 }
 .mobile-nav-link.router-link-active {
-  @apply bg-blue-50 text-mairie-blue;
+  background-color: #eff6ff; /* blue-50 */
+  color: #0056b3; /* mairie-blue */
 }
 
 @keyframes fadeIn {

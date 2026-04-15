@@ -69,20 +69,20 @@ const routes = [
     meta: { requiresAdmin: true },
     children: [
       { path: '', name: 'Dashboard', component: Dashboard },
-      { path: 'communes', name: 'Communes', component: Communes },
-      { path: 'agents', name: 'Agents', component: Agents },
-      { path: 'types-taxes', name: 'TypeTaxes', component: TypeTaxes },
-      { path: 'quartiers', name: 'Quartiers', component: Quartiers },
-      { path: 'paiements', name: 'Paiements', component: Paiements },
-      { path: 'settings', name: 'Settings', component: Settings },
+      { path: 'communes', name: 'Communes', component: Communes, meta: { roles: ['super_admin'] } },
+      { path: 'agents', name: 'Agents', component: Agents, meta: { roles: ['super_admin'] } },
+      { path: 'types-taxes', name: 'TypeTaxes', component: TypeTaxes, meta: { roles: ['super_admin'] } },
+      { path: 'quartiers', name: 'Quartiers', component: Quartiers, meta: { roles: ['super_admin'] } },
+      { path: 'paiements', name: 'Paiements', component: Paiements, meta: { roles: ['super_admin', 'maire'] } },
+      { path: 'settings', name: 'Settings', component: Settings, meta: { roles: ['super_admin'] } },
       
       // Nouvelles routes d'approbation
-      { path: 'contribuables', name: 'AdminContribuables', component: AdminContribuables },
-      { path: 'taxes', name: 'AdminTaxes', component: AdminTaxes },
-      { path: 'paiements-en-ligne', name: 'AdminPaiements', component: AdminPaiements },
-      { path: 'etat-civil', name: 'AdminEtatCivil', component: AdminEtatCivil },
-      { path: 'actualites', name: 'AdminActualites', component: AdminActualites },
-      { path: 'services', name: 'AdminServices', component: AdminServices },
+      { path: 'contribuables', name: 'AdminContribuables', component: AdminContribuables, meta: { roles: ['super_admin', 'maire'] } },
+      { path: 'taxes', name: 'AdminTaxes', component: AdminTaxes, meta: { roles: ['super_admin', 'maire'] } },
+      { path: 'paiements-en-ligne', name: 'AdminPaiements', component: AdminPaiements, meta: { roles: ['super_admin', 'maire'] } },
+      { path: 'etat-civil', name: 'AdminEtatCivil', component: AdminEtatCivil, meta: { roles: ['super_admin', 'maire'] } },
+      { path: 'actualites', name: 'AdminActualites', component: AdminActualites, meta: { roles: ['super_admin', 'maire'] } },
+      { path: 'services', name: 'AdminServices', component: AdminServices, meta: { roles: ['super_admin', 'maire'] } },
     ],
   },
 ];
@@ -96,11 +96,18 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const isAdminAuthenticated = auth.isAuthenticated.value;
   const isUserAuthenticated = userAuth.isAuthenticated.value;
+  const userRole = auth.user.value?.role;
 
   // Admin guards
   if (to.meta.requiresAdmin && !isAdminAuthenticated) {
     return next({ name: 'AdminLogin' });
   }
+  
+  // Role based restriction
+  if (to.meta.roles && !to.meta.roles.includes(userRole)) {
+    return next({ name: 'Dashboard' }); // Redirect to dashboard if not authorized
+  }
+
   if (to.meta.guestAdmin && isAdminAuthenticated) {
     return next({ name: 'Dashboard' });
   }

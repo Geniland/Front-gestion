@@ -19,7 +19,19 @@ const userAuth = {
   token: computed(() => state.token),
   isAuthenticated: computed(() => !!state.token),
 
+  clear() {
+    state.token = null;
+    state.user = null;
+    localStorage.removeItem('site_token');
+    localStorage.removeItem('site_user');
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+  },
+
   async login(credentials) {
+    // Nettoyer toute ancienne session avant de tenter un nouveau login
+    this.clear();
+    
     const response = await api.post('/public/login', credentials);
     const { token, user } = response.data;
     state.token = token;
@@ -47,10 +59,7 @@ const userAuth = {
     } catch (e) {
       // ignore
     } finally {
-      state.token = null;
-      state.user = null;
-      localStorage.removeItem('site_token');
-      localStorage.removeItem('site_user');
+      this.clear();
     }
   }
 };

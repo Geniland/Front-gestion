@@ -14,12 +14,23 @@ const state = reactive({
 });
 
 const auth = {
-  user: state,
+  state,
+  user: computed(() => state.user),
   token: computed(() => state.token),
   isAuthenticated: computed(() => !!state.token),
 
+  clear() {
+    state.token = null;
+    state.user = null;
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('site_token');
+    localStorage.removeItem('site_user');
+  },
+
 async login(credentials) {
   try {
+    this.clear();
     const response = await api.post('/login', credentials);
     // console.log(response.data);
     const { token, agent } = response.data;
@@ -42,10 +53,7 @@ async login(credentials) {
     } catch (error) {
       console.error('Logout failed', error);
     } finally {
-      state.token = null;
-      state.user = null;
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
+      this.clear();
     }
   },
 
