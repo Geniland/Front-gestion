@@ -1,5 +1,5 @@
 import { reactive, computed } from 'vue';
-import api from '../api/axios';
+import apiPublic from '../api/axiosPublic';
 
 const state = reactive({
   user: (() => {
@@ -32,7 +32,7 @@ const userAuth = {
     // Nettoyer toute ancienne session avant de tenter un nouveau login
     this.clear();
     
-    const response = await api.post('/public/login', credentials);
+    const response = await apiPublic.post('/public/login', credentials);
     const { token, user } = response.data;
     state.token = token;
     state.user = user;
@@ -42,7 +42,7 @@ const userAuth = {
   },
 
   async register(payload) {
-    const response = await api.post('/public/register', payload);
+    const response = await apiPublic.post('/public/register', payload);
     const { token, user } = response.data;
     if (token && user) {
       state.token = token;
@@ -55,7 +55,7 @@ const userAuth = {
 
   async logout() {
     try {
-      await api.post('/public/logout');
+      await apiPublic.post('/public/logout');
     } catch (e) {
       // ignore
     } finally {

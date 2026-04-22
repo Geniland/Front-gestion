@@ -14,15 +14,24 @@ export default {
     };
   },
   async mounted() {
-    this.$nextTick(async () => {
+    // On attend un peu plus pour être sûr que le container est rendu
+    setTimeout(async () => {
       try {
-        // On s'assure que le container existe
-        if (!this.$refs.mapContainer) return;
+        const container = this.$refs.mapContainer;
+        if (!container) {
+          console.warn("Map container not found after timeout");
+          return;
+        }
+
+        // Si une carte existe déjà, on la supprime
+        if (this.map) {
+          this.map.remove();
+        }
 
         const res = await api.get("/quartiers");
         const quartiers = res.data.data?.data || res.data.data || [];
 
-        this.map = L.map(this.$refs.mapContainer).setView([6.1725, 1.2314], 12);
+        this.map = L.map(container).setView([6.1725, 1.2314], 12);
 
         L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
           attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
@@ -47,7 +56,7 @@ export default {
       } catch (error) {
         console.error("Erreur lors de l'initialisation de la carte:", error);
       }
-    });
+    }, 500);
   },
   beforeUnmount() {
     if (this.map) {

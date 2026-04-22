@@ -277,23 +277,44 @@ export default {
       showModal.value = false;
     };
 
-    const saveAgent = async () => {
-      saving.value = true;
-      try {
-        const payload = { ...form };
-        if (isEditing.value) {
-          await api.put(`/agents/${currentId.value}`, payload);
-        } else {
-          await api.post('/agents', payload);
-        }
-        fetchAgents(pagination.value?.current_page || 1);
-        closeModal();
-      } catch (error) {
-        alert(error.response?.data?.message || 'Une erreur est survenue');
-      } finally {
-        saving.value = false;
-      }
+  const saveAgent = async () => {
+  saving.value = true;
+
+  try {
+    const payload = {
+      commune_id: form.commune_id,
+      nom: form.nom,
+      telephone: form.telephone,
+      email: form.email,
+      role: form.role,
     };
+
+    if (form.password) {
+      payload.password = form.password;
+      payload.password_confirmation = form.password_confirmation;
+    }
+
+    if (isEditing.value) {
+      await api.put(`/agents/${currentId.value}`, payload);
+    } else {
+      await api.post('/agents', payload);
+    }
+
+    fetchAgents();
+    closeModal();
+
+  } catch (error) {
+    console.log(error.response?.data);
+
+    if (error.response?.data?.errors?.email) {
+      alert("Cet email est déjà utilisé par un autre agent.");
+    } else {
+      alert(error.response?.data?.message || "Erreur serveur");
+    }
+  } finally {
+    saving.value = false;
+  }
+};
 
     const confirmDelete = async (agent) => {
       if (confirm(`Voulez-vous vraiment supprimer l'agent "${agent.nom}" ?`)) {
@@ -322,7 +343,7 @@ export default {
       if (confirm(`Voulez-vous débloquer l'agent ${agent.nom} ?`)) {
         try {
           // On utilise l'update classique pour débloquer
-          await api.post(`/agents/${agent.id}/unblock `, { 
+          await api.post(`/agents/${agent.id}/unblock`, { 
             ...agent,
             is_blocked: false,
             blocked_reason: null

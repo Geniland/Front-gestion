@@ -10,13 +10,13 @@
 
 <script setup>
 import { ref } from 'vue';
-import api from '../../api/axios';
+import apiPublic from '../../api/axiosPublic';
 
 const email = ref('');
 
 async function submit() {
   try {
-    await api.post('/public/forgot-password', { email: email.value });
+    await apiPublic.post('/public/forgot-password', { email: email.value });
     alert('Si un compte existe, un email a été envoyé');
   } catch (e) {
     alert('Erreur lors de la demande');

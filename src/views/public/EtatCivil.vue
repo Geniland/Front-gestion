@@ -176,7 +176,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import api from '../../api/axios';
+import apiPublic from '../../api/axiosPublic';
 import userAuth from '../../store/userAuth';
 
 const form = ref({
@@ -195,7 +195,7 @@ const submitting = ref(false);
 const fetchDemandes = async () => {
   loading.value = true;
   try {
-    const response = await api.get('/public/etat-civil/historique');
+    const response = await apiPublic.get('/public/etat-civil/historique');
     
     if (response.data && response.data.status === true) {
       demandes.value = response.data.data || [];
@@ -264,7 +264,7 @@ async function handleSubmit() {
       fd.append('files[]', file);
     });
 
-    const response = await api.post('/public/etat-civil', fd, {
+    const response = await apiPublic.post('/public/etat-civil', fd, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
 

@@ -2,9 +2,9 @@
   <div class="max-w-md mx-auto px-6 py-16">
     <h1 class="text-2xl font-bold mb-6">Inscription</h1>
     <form @submit.prevent="submit" class="space-y-4">
-      <input v-model="nom" placeholder="Nom complet" class="w-full border rounded px-3 py-2" />
-      <input v-model="email" type="email" placeholder="Email" class="w-full border rounded px-3 py-2" />
-      <!-- <input v-model="telephone" placeholder="Téléphone" class="w-full border rounded px-3 py-2" /> -->
+      <input v-model="nom" placeholder="Nom complet" class="w-full border rounded px-3 py-2" required />
+      <input v-model="email" type="email" placeholder="Email" class="w-full border rounded px-3 py-2" required />
+      <input v-model="telephone" placeholder="Téléphone" class="w-full border rounded px-3 py-2" required />
       <input v-model="password" type="password" placeholder="Mot de passe (min 8 car.)" class="w-full border rounded px-3 py-2" required />
       <input v-model="password_confirmation" type="password" placeholder="Confirmer le mot de passe" class="w-full border rounded px-3 py-2" required />
       <div v-if="error" class="text-red-500 text-sm">{{ error }}</div>
@@ -26,6 +26,7 @@ import { useRouter } from 'vue-router';
 const router = useRouter();
 const nom = ref('');
 const email = ref('');
+const telephone = ref('');
 const password = ref('');
 const password_confirmation = ref('');
 const error = ref('');
@@ -49,6 +50,7 @@ async function submit() {
     const response = await userAuth.register({  
       name: nom.value,
       email: email.value,
+      phone: telephone.value,
       password: password.value,
       password_confirmation: password_confirmation.value, 
     });

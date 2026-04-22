@@ -40,8 +40,12 @@
             <textarea v-model="form.contenu" class="w-full border rounded-lg px-3 py-2" rows="6"></textarea>
           </div>
           <div>
-            <label class="block text-sm font-medium mb-1">URL Image</label>
-            <input v-model="form.image" class="w-full border rounded-lg px-3 py-2" placeholder="https://..." />
+            <label class="block text-sm font-medium mb-1">Image</label>
+            <input type="file" @change="handleFileUpload" class="w-full border rounded-lg px-3 py-2" accept="image/*" />
+            <div v-if="form.image && typeof form.image === 'string'" class="mt-2">
+              <p class="text-xs text-gray-500 mb-1">Image actuelle :</p>
+              <img :src="form.image" class="h-20 w-32 object-cover rounded border" />
+            </div>
           </div>
           <div>
             <label class="block text-sm font-medium mb-1">Date de publication</label>
@@ -81,21 +85,47 @@ const openModal = (a = null) => {
     form.value = { ...a, published_at: a.published_at ? a.published_at.substring(0, 16) : '' };
   } else {
     isEditing.value = false;
-    form.value = { titre: '', resume: '', contenu: '', image: '', published_at: new Date().toISOString().substring(0, 16) };
+    form.value = { titre: '', resume: '', contenu: '', image: null, published_at: new Date().toISOString().substring(0, 16) };
   }
   showModal.value = true;
 };
 
+const handleFileUpload = (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    form.value.image = file;
+  }
+};
+
 const saveActualite = async () => {
   try {
+    const formData = new FormData();
+    formData.append('titre', form.value.titre);
+    if (form.value.resume) formData.append('resume', form.value.resume);
+    if (form.value.contenu) formData.append('contenu', form.value.contenu);
+    if (form.value.published_at) formData.append('published_at', form.value.published_at);
+    
+    if (form.value.image instanceof File) {
+      formData.append('image', form.value.image);
+    }
+
     if (isEditing.value) {
-      await api.put(`/public/admin/actualites/${currentId.value}`, form.value);
+      // Laravel PUT with files needs _method trick
+      formData.append('_method', 'PUT');
+      await api.post(`/public/admin/actualites/${currentId.value}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
     } else {
-      await api.post('/public/admin/actualites', form.value);
+      await api.post('/public/admin/actualites', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
     }
     showModal.value = false;
     fetchActualites();
-  } catch (e) { alert('Erreur'); }
+  } catch (e) { 
+    console.error(e);
+    alert('Erreur lors de l\'enregistrement'); 
+  }
 };
 
 const deleteActualite = async (id) => {

@@ -1,9 +1,11 @@
 <template>
   <div class="min-h-screen flex flex-col font-sans">
+    
     <!-- Navbar -->
     <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-20">
+          
           <!-- Logo -->
           <router-link to="/" class="flex items-center gap-3 group">
             <div class="w-10 h-10 bg-mairie-blue rounded-xl flex items-center justify-center text-white shadow-lg shadow-mairie-blue/20 group-hover:scale-110 transition-transform">
@@ -28,51 +30,29 @@
           <div class="flex items-center gap-4">
             <template v-if="!isAuthenticated">
               <div class="hidden sm:flex items-center gap-3">
-                <router-link to="/login" class="text-sm font-bold text-gray-600 hover:text-mairie-blue transition-colors px-4 py-2">Connexion</router-link>
-                <router-link to="/register" class="px-6 py-2.5 rounded-full bg-mairie-blue text-white hover:bg-blue-700 shadow-lg shadow-mairie-blue/20 transition-all font-bold text-sm">S'inscrire</router-link>
+                <router-link to="/login" class="text-sm font-bold text-gray-600 hover:text-mairie-blue transition-colors px-4 py-2">
+                  Connexion
+                </router-link>
+                <router-link to="/register" class="px-6 py-2.5 rounded-full bg-mairie-blue text-white hover:bg-blue-700 shadow-lg shadow-mairie-blue/20 transition-all font-bold text-sm">
+                  S'inscrire
+                </router-link>
               </div>
             </template>
+
             <template v-else>
               <div class="flex items-center gap-3">
+                
                 <!-- Notifications -->
                 <div class="relative">
-                  <button @click="showNotifs = !showNotifs" class="p-2.5 text-gray-500 hover:bg-gray-50 rounded-xl transition-all relative">
-                    <i class="far fa-bell text-xl"></i>
-                    <span v-if="unreadCount > 0" class="absolute top-2 right-2 w-4 h-4 bg-red-500 text-white text-[9px] rounded-full flex items-center justify-center font-black border-2 border-white animate-bounce">
+                  <button @click="toggleChat" class="p-2.5 text-gray-500 hover:bg-gray-50 rounded-xl transition-all relative group">
+                    <i class="far fa-bell text-xl group-hover:rotate-12 transition-transform"></i>
+                    <span
+                      v-if="unreadCount > 0"
+                      class="absolute -top-1 -right-1 min-w-[1.25rem] h-5 bg-red-600 text-white text-[10px] rounded-full flex items-center justify-center font-black border-2 border-white shadow-sm px-1 animate-bounce"
+                    >
                       {{ unreadCount }}
                     </span>
                   </button>
-
-                  <!-- Notifs Dropdown -->
-                  <div v-if="showNotifs" class="absolute right-0 mt-4 w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2">
-                    <div class="p-5 border-b border-gray-50 flex items-center justify-between bg-gray-50/50">
-                      <span class="font-black text-xs uppercase tracking-widest text-gray-500">Notifications</span>
-                      <button @click="showNotifs = false" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
-                    </div>
-                    <div class="max-h-96 overflow-y-auto">
-                      <div v-if="notifications.length === 0" class="p-10 text-center flex flex-col items-center gap-3">
-                        <div class="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center text-gray-300 text-xl">
-                          <i class="far fa-bell-slash"></i>
-                        </div>
-                        <p class="text-gray-400 text-sm font-medium">Tout est à jour !</p>
-                      </div>
-                      <div v-for="n in notifications" :key="n.id" class="p-4 border-b border-gray-50 hover:bg-blue-50/30 transition-colors cursor-pointer" @click="handleNotifClick(n)">
-                        <div class="flex gap-4">
-                          <div :class="n.type === 'taxe' ? 'bg-amber-100 text-amber-600' : 'bg-blue-100 text-blue-600'" class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-sm shadow-sm">
-                            <i :class="n.type === 'taxe' ? 'fas fa-receipt' : 'fas fa-fingerprint'"></i>
-                          </div>
-                          <div class="flex-1">
-                            <div class="text-xs font-black text-gray-900 mb-1">{{ n.title }}</div>
-                            <div class="text-[11px] text-gray-500 leading-relaxed line-clamp-2">{{ n.message }}</div>
-                            <div class="text-[9px] text-mairie-blue mt-2 font-black uppercase tracking-tighter">{{ n.date }}</div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div v-if="notifications.length > 0" class="p-4 bg-gray-50/50 text-center border-t border-gray-100">
-                      <button @click="clearNotifications" class="text-[10px] font-black text-mairie-blue hover:text-blue-800 uppercase tracking-widest">Marquer tout comme lu</button>
-                    </div>
-                  </div>
                 </div>
 
                 <!-- User Profile -->
@@ -82,6 +62,7 @@
                     {{ user?.name?.charAt(0) || 'U' }}
                   </div>
                 </router-link>
+
               </div>
             </template>
 
@@ -100,12 +81,139 @@
         <router-link @click="mobileMenuOpen = false" to="/actualites" class="mobile-nav-link">Actualités</router-link>
         <router-link @click="mobileMenuOpen = false" to="/taxes" class="mobile-nav-link">Taxes & Paiement</router-link>
         <router-link @click="mobileMenuOpen = false" to="/etat-civil" class="mobile-nav-link">État civil</router-link>
+
         <div v-if="!isAuthenticated" class="pt-4 border-t border-gray-50 flex flex-col gap-3">
-          <router-link to="/login" class="w-full py-3 rounded-xl bg-gray-50 text-center font-bold text-gray-600">Connexion</router-link>
-          <router-link to="/register" class="w-full py-3 rounded-xl bg-mairie-blue text-center font-bold text-white">Créer un compte</router-link>
+          <router-link to="/login" class="w-full py-3 rounded-xl bg-gray-50 text-center font-bold text-gray-600">
+            Connexion
+          </router-link>
+          <router-link to="/register" class="w-full py-3 rounded-xl bg-mairie-blue text-center font-bold text-white">
+            Créer un compte
+          </router-link>
         </div>
       </div>
     </header>
+
+
+    <!-- ✅ CHAT MODAL (SORTI DU HEADER POUR ÉVITER LE PROBLÈME) -->
+    <div
+      v-if="showChatModal"
+      class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-md px-4 py-10"
+      @click.self="closeChat"
+    >
+      <div class="bg-white w-full max-w-lg rounded-[2rem] shadow-2xl flex flex-col h-[650px] overflow-hidden animate-in fade-in zoom-in duration-300">
+
+        <!-- Header modal -->
+        <div class="p-6 border-b border-gray-100 flex items-center justify-between bg-mairie-blue text-white">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+              <i class="fas fa-comments text-xl"></i>
+            </div>
+            <div>
+              <h3 class="font-black text-sm uppercase tracking-widest">Messagerie Mairie</h3>
+              <div class="flex items-center gap-1.5">
+                <span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
+                <p class="text-[10px] opacity-80 uppercase font-bold tracking-tighter">
+                  Support en ligne
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <button @click="closeChat" class="w-10 h-10 rounded-xl hover:bg-white/10 flex items-center justify-center transition-all">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <!-- Messages -->
+        <div class="flex-1 overflow-y-auto p-6 bg-gray-50/50" ref="chatContainer">
+          <div v-if="chatMessages.length === 0" class="flex flex-col items-center justify-center h-full text-gray-400 space-y-6">
+            <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center text-3xl opacity-20">
+              <i class="far fa-comments"></i>
+            </div>
+            <p class="text-xs font-bold uppercase tracking-widest text-center">
+              Aucun message pour le moment.<br />
+              Posez vos questions à la mairie.
+            </p>
+          </div>
+
+          <div v-else>
+            <div v-for="(messages, date) in groupedMessages" :key="date">
+              <!-- Date Separator -->
+              <div class="flex justify-center my-8">
+                <span class="px-4 py-1.5 bg-white text-[9px] font-black uppercase tracking-[0.2em] text-gray-400 rounded-full border border-gray-100 shadow-sm">
+                  {{ date }}
+                </span>
+              </div>
+
+              <div
+                v-for="msg in messages"
+                :key="msg.id"
+                :class="msg.sender_type === 'citizen' ? 'flex justify-end' : 'flex justify-start'"
+                class="mb-6 last:mb-0"
+              >
+                <div
+                  :class="[
+                    msg.sender_type === 'citizen'
+                      ? 'bg-mairie-blue text-white rounded-2xl rounded-tr-none shadow-lg shadow-blue-500/10'
+                      : 'bg-white text-gray-800 rounded-2xl rounded-tl-none shadow-sm border border-gray-100',
+                    msg.sender_type === 'admin' && !msg.is_read ? 'ring-2 ring-red-500/10' : ''
+                  ]"
+                  class="max-w-[85%] p-5 text-sm font-medium leading-relaxed relative group"
+                >
+                  {{ msg.message }}
+
+                  <div
+                    class="text-[9px] mt-3 opacity-60 font-black uppercase tracking-tighter flex items-center gap-2"
+                    :class="msg.sender_type === 'citizen' ? 'text-white' : 'text-gray-400'"
+                  >
+                    <i class="far fa-clock"></i>
+                    {{ new Date(msg.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) }}
+                    
+                    <!-- Status indicator for citizen messages -->
+                    <template v-if="msg.sender_type === 'citizen'">
+                      <div class="flex items-center ml-auto px-1.5 py-0.5 rounded-full bg-white/10 group-hover:bg-white/20 transition-colors">
+                        <i class="fas fa-check text-[8px] transition-colors" :class="msg.is_read ? 'text-emerald-300' : 'text-white/40'"></i>
+                        <i v-if="msg.is_read" class="fas fa-check text-[8px] -ml-1 text-emerald-300 animate-in fade-in zoom-in"></i>
+                      </div>
+                    </template>
+                    
+                    <!-- Unread dot for admin messages -->
+                    <template v-else-if="!msg.is_read">
+                      <span class="w-1.5 h-1.5 bg-red-500 rounded-full ml-auto animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.5)]"></span>
+                    </template>
+                  </div>
+                  
+                  <!-- Left accent for unread admin messages -->
+                  <div v-if="msg.sender_type === 'admin' && !msg.is_read" class="absolute -left-1 top-1/2 -translate-y-1/2 w-1 h-8 bg-red-500 rounded-full"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Input -->
+        <div class="p-5 bg-white border-t border-gray-100">
+          <form @submit.prevent="sendMessage" class="flex gap-3">
+            <input
+              v-model="newMessage"
+              type="text"
+              placeholder="Votre message..."
+              class="flex-1 bg-gray-50 border-none rounded-2xl px-6 py-4 text-sm focus:ring-4 focus:ring-mairie-blue/10 transition-all outline-none"
+            />
+            <button
+              type="submit"
+              :disabled="!newMessage.trim() || sendingMessage"
+              class="w-14 h-14 bg-mairie-blue text-white rounded-2xl flex items-center justify-center hover:bg-blue-700 transition-all shadow-xl shadow-mairie-blue/20 disabled:opacity-50 active:scale-95"
+            >
+              <i class="fas fa-paper-plane" v-if="!sendingMessage"></i>
+              <i class="fas fa-spinner fa-spin" v-else></i>
+            </button>
+          </form>
+        </div>
+
+      </div>
+    </div>
+
 
     <main class="flex-1">
       <router-view />
@@ -122,14 +230,11 @@
               </div>
               <span class="font-black text-xl tracking-tight text-white">GOLFE 7</span>
             </router-link>
-            <p class="text-sm leading-relaxed opacity-70">Au cœur du développement local, nous œuvrons chaque jour pour une commune moderne, inclusive et durable au service de chaque citoyen.</p>
-            <div class="flex gap-4">
-              <a href="#" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-mairie-blue hover:text-white transition-all"><i class="fab fa-facebook-f"></i></a>
-              <a href="#" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-mairie-blue hover:text-white transition-all"><i class="fab fa-twitter"></i></a>
-              <a href="#" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-mairie-blue hover:text-white transition-all"><i class="fab fa-youtube"></i></a>
-            </div>
+            <p class="text-sm leading-relaxed opacity-70">
+              Au cœur du développement local, nous œuvrons chaque jour pour une commune moderne, inclusive et durable au service de chaque citoyen.
+            </p>
           </div>
-          
+
           <div>
             <h3 class="font-black text-xs uppercase tracking-[0.2em] text-white mb-8">Services Rapides</h3>
             <ul class="space-y-4 text-sm font-medium">
@@ -185,7 +290,9 @@
         </div>
 
         <div class="pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
-          <div class="text-xs font-medium opacity-50">© {{ new Date().getFullYear() }} Mairie de Golfe 7. Développement local & Proximité citoyenne.</div>
+          <div class="text-xs font-medium opacity-50">
+            © {{ new Date().getFullYear() }} Mairie de Golfe 7. Développement local & Proximité citoyenne.
+          </div>
           <div class="flex gap-8 text-[10px] font-black uppercase tracking-widest opacity-50">
             <a href="#" class="hover:text-white transition-colors">Confidentialité</a>
             <a href="#" class="hover:text-white transition-colors">Mentions Légales</a>
@@ -194,6 +301,7 @@
         </div>
       </div>
     </footer>
+
   </div>
 </template>
 
@@ -201,86 +309,127 @@
 import { computed, ref, onMounted, watch } from 'vue';
 import userAuth from '../../store/userAuth';
 import { useRouter } from 'vue-router';
-import api from '../../api/axios';
+import apiPublic from '../../api/axiosPublic';
 
 const router = useRouter();
-const isAuthenticated = computed(() => userAuth.isAuthenticated.value);
-const user = computed(() => userAuth.user.value);
+const isAuthenticated = userAuth.isAuthenticated;
+const user = userAuth.user;
 
-const showNotifs = ref(false);
+const showChatModal = ref(false);
 const mobileMenuOpen = ref(false);
-const notifications = ref([]);
-const unreadCount = computed(() => notifications.value.length);
+const chatMessages = ref([]);
+const newMessage = ref('');
+const sendingMessage = ref(false);
+const chatContainer = ref(null);
 
 async function fetchNotifications() {
-  if (!isAuthenticated.value || !userAuth.token.value) return;
-  
+  if (!isAuthenticated.value) return;
   try {
-    const [taxesRes, requestsRes] = await Promise.all([
-      api.get('/public/taxes'),
-      api.get('/public/etat-civil/historique')
-    ]);
-
-    const newNotifs = [];
-
-    // Notifications pour les taxes
-    const taxes = taxesRes.data.data?.data || taxesRes.data.data || [];
-    taxes.forEach(t => {
-      if (t.commentaire_admin && t.status !== 'en_attente') {
-        newNotifs.push({
-          id: `taxe-${t.id}`,
-          type: 'taxe',
-          title: `Mise à jour Taxe: ${t.status}`,
-          message: t.commentaire_admin,
-          date: new Date(t.updated_at).toLocaleDateString('fr-FR'),
-          link: '/taxes'
-        });
-      }
-    });
-
-    // Notifications pour l'état civil
-    const requests = requestsRes.data.data || [];
-    requests.forEach(r => {
-      if (r.commentaire_admin && r.status !== 'en_attente') {
-        newNotifs.push({
-          id: `etc-${r.id}`,
-          type: 'etat-civil',
-          title: `État Civil: ${r.status}`,
-          message: r.commentaire_admin,
-          date: new Date(r.updated_at).toLocaleDateString('fr-FR'),
-          link: '/etat-civil'
-        });
-      }
-    });
-
-    // Trier par date décroissante
-    notifications.value = newNotifs.sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
-  } catch (e) {
-    console.error("Erreur chargement notifications", e);
+    const response = await apiPublic.get('/notifications');
+    chatMessages.value = response.data.data;
+  } catch (error) {
+    console.error('Erreur notifications:', error);
   }
 }
 
-function handleNotifClick(n) {
-  showNotifs.value = false;
-  router.push(n.link);
-}
-
-function clearNotifications() {
-  notifications.value = [];
-  showNotifs.value = false;
-}
-
-watch(isAuthenticated, (val) => {
-  if (val) fetchNotifications();
-  else notifications.value = [];
+const unreadCount = computed(() => {
+  if (!isAuthenticated.value) return 0;
+  return chatMessages.value.filter(m => !m.is_read && m.sender_type === 'admin').length;
 });
+
+const groupedMessages = computed(() => {
+  const groups = {};
+  chatMessages.value.forEach(msg => {
+    const date = new Date(msg.created_at).toLocaleDateString('fr-FR', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
+    if (!groups[date]) groups[date] = [];
+    groups[date].push(msg);
+  });
+  return groups;
+});
+
+function closeChat() {
+  showChatModal.value = false;
+}
+
+function toggleChat() {
+  showChatModal.value = !showChatModal.value;
+
+  if (showChatModal.value) {
+    fetchNotifications();
+    markAllAsRead();
+
+    setTimeout(() => {
+      if (chatContainer.value) {
+        chatContainer.value.scrollTo({
+          top: chatContainer.value.scrollHeight,
+          behavior: 'smooth'
+        });
+      }
+    }, 300);
+  }
+}
+
+async function markAllAsRead() {
+  const unread = chatMessages.value.filter(m => !m.is_read && m.sender_type === 'admin');
+  if (unread.length === 0) return;
+
+  for (const m of unread) {
+    try {
+      await apiPublic.post(`/notifications/${m.id}/read`);
+      m.is_read = true;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+}
+
+async function sendMessage() {
+  if (!newMessage.value.trim() || sendingMessage.value) return;
+
+  const text = newMessage.value;
+  newMessage.value = '';
+  sendingMessage.value = true;
+
+  try {
+    const response = await apiPublic.post('/notifications', {
+      message: text,
+      title: 'Message de ' + user.value.name
+    });
+
+    chatMessages.value.push(response.data.data);
+
+    setTimeout(() => {
+      if (chatContainer.value) {
+        chatContainer.value.scrollTo({
+          top: chatContainer.value.scrollHeight,
+          behavior: 'smooth'
+        });
+      }
+    }, 100);
+
+  } catch (error) {
+    newMessage.value = text;
+    console.error('Erreur envoi message:', error);
+    alert("Erreur lors de l'envoi du message");
+  } finally {
+    sendingMessage.value = false;
+  }
+}
 
 onMounted(() => {
   if (isAuthenticated.value) {
     fetchNotifications();
-    // Rafraîchir toutes les 2 minutes
-    setInterval(fetchNotifications, 120000);
+    setInterval(fetchNotifications, 10000);
   }
+});
+
+watch(isAuthenticated, (val) => {
+  if (val) fetchNotifications();
+  else chatMessages.value = [];
 });
 
 async function handleLogout() {
@@ -293,44 +442,50 @@ async function handleLogout() {
 .nav-link {
   font-size: 0.875rem;
   font-weight: 700;
-  color: #6b7280; /* text-gray-500 */
-  transition-property: all;
+  color: #6b7280;
+  transition: all 0.3s ease;
   position: relative;
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.75rem;
 }
 .nav-link:hover {
-  color: #0056b3; /* mairie-blue */
+  color: #0056b3;
+  background-color: #f3f4f6;
 }
 .nav-link.router-link-active {
-  color: #0056b3; /* mairie-blue */
+  color: #0056b3;
+  background-color: #eff6ff;
 }
 .nav-link.router-link-active::after {
   content: '';
   position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 2px;
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
   background-color: #0056b3;
-  border-radius: 9999px;
+  border-radius: 50%;
 }
 
 .mobile-nav-link {
-  display: block;
+  display: flex;
+  align-items: center;
   padding: 1rem 1.5rem;
   border-radius: 1rem;
-  font-weight: 900;
-  color: #374151; /* text-gray-700 */
-  transition-property: all;
+  font-weight: 800;
+  color: #4b5563;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
 }
 .mobile-nav-link:hover {
-  background-color: #f9fafb; /* gray-50 */
-  color: #0056b3; /* mairie-blue */
+  background-color: #f9fafb;
+  color: #0056b3;
 }
 .mobile-nav-link.router-link-active {
-  background-color: #eff6ff; /* blue-50 */
-  color: #0056b3; /* mairie-blue */
+  background-color: #eff6ff;
+  color: #0056b3;
+  border-color: #dbeafe;
 }
 
 @keyframes fadeIn {
@@ -341,4 +496,3 @@ async function handleLogout() {
   animation: fadeIn 0.3s ease-out forwards;
 }
 </style>
-

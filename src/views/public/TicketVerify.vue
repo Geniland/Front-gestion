@@ -44,7 +44,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import api from '../../api/axios';
+import apiPublic from '../../api/axiosPublic';
 
 const route = useRoute();
 const reference = route.params.reference;
@@ -52,23 +52,20 @@ const status = ref('invalid');
 const ticket = ref(null);
 const loading = ref(true);
 
-onMounted(async () => {
+const verifyTicket = async () => {
   try {
-    const { data } = await api.get(`/v/${reference}`.replace('/api', '')); // if baseURL includes /api
-    // If backend is proxied via /api, use /api/v/{reference}
+    const { data } = await apiPublic.get(`/public/tickets/verify/${reference}`);
+    status.value = data.status;
+    ticket.value = data.ticket;
   } catch (e) {
-    // fallback using API prefix
-    try {
-      const { data } = await api.get(`/v/${reference}`.startsWith('/api') ? `/v/${reference}` : `/v/${reference}`);
-      status.value = data.status;
-      ticket.value = data.ticket;
-    } catch (e2) {
-      status.value = 'invalid';
-    }
+    console.error(e);
+    status.value = 'invalid';
   } finally {
     loading.value = false;
   }
-});
+};
+
+onMounted(verifyTicket);
 
 function formatPrice(n) {
   try {

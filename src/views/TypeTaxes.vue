@@ -206,7 +206,7 @@ export default {
     const fetchTypeTaxes = async (page = 1) => {
       loading.value = true;
       try {
-        const response = await api.get(`/types-taxes?page=${page}`);
+        const response = await api.get(`/types-taxes?page=${page}&all=1`);
         if (response.data.success) {
           typetaxes.value = response.data.data.data;
           pagination.value = response.data.data;

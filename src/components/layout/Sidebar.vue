@@ -60,6 +60,11 @@
               <i class="fas fa-file-signature"></i> État Civil
             </router-link>
           </li>
+          <li :class="{ active: $route.name === 'AdminMessages' }">
+            <router-link to="/admin/messages">
+              <i class="fas fa-comments"></i> Messagerie
+            </router-link>
+          </li>
         </template>
 
         <template v-if="isSuperAdmin || isMaire">

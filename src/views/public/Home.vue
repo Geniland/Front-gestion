@@ -195,13 +195,13 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import api from '../../api/axios';
+import apiPublic from '../../api/axiosPublic';
 
 const actualites = ref([]);
 
 onMounted(async () => {
   try {
-    const { data } = await api.get('/public/actualites');
+    const { data } = await apiPublic.get('/public/actualites');
     actualites.value = Array.isArray(data) ? data : (data.data || []);
   } catch (e) {
     console.error(e);

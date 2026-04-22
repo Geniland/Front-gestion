@@ -12,7 +12,20 @@
     </div>
 
     <div class="grid grid-cols-1 gap-6">
-      <div v-for="d in filteredItems" :key="d.id" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 hover:shadow-md transition-shadow">
+      <!-- Loading state -->
+      <div v-if="loading" class="text-center py-24 bg-white rounded-2xl border border-gray-100 shadow-sm">
+        <i class="fas fa-spinner fa-spin text-3xl text-blue-500 mb-4"></i>
+        <p class="text-gray-400 font-medium">Chargement des demandes...</p>
+      </div>
+
+      <!-- Error state -->
+      <div v-else-if="error" class="text-center py-24 bg-white rounded-2xl border border-rose-100 shadow-sm">
+        <i class="fas fa-exclamation-triangle text-3xl text-rose-500 mb-4"></i>
+        <p class="text-rose-600 font-medium">{{ error }}</p>
+        <button @click="fetchDemandes" class="mt-4 text-blue-600 font-bold hover:underline">Réessayer</button>
+      </div>
+
+      <div v-else v-for="d in filteredItems" :key="d.id" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 hover:shadow-md transition-shadow">
         <div class="flex items-start gap-5">
           <div :class="typeIconClass(d.type)" class="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0">
             <i :class="typeIcon(d.type)"></i>
@@ -23,16 +36,40 @@
               <span :class="badgeClass(d.status)" class="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase">{{ d.status }}</span>
             </div>
             <div class="text-sm text-gray-600 font-medium">
+              <i class="fas fa-user-circle mr-1 text-blue-500"></i> <span class="font-bold">{{ d.user_name }}</span>
+              <span class="mx-2 text-gray-300">|</span>
               <i class="fas fa-user mr-1 text-gray-400"></i> {{ d.nom }} 
               <span class="mx-2 text-gray-300">|</span>
               <i class="fas fa-phone mr-1 text-gray-400"></i> {{ d.telephone }}
             </div>
             <div class="text-xs text-gray-400 mt-2 flex items-center gap-4">
+              <span><i class="fas fa-envelope mr-1"></i> {{ d.user_email }}</span>
               <span><i class="fas fa-hashtag mr-1"></i> {{ d.reference }}</span>
               <span><i class="far fa-calendar-alt mr-1"></i> {{ formatDate(d.created_at) }}</span>
             </div>
             <div v-if="d.details" class="mt-3 p-3 bg-gray-50 rounded-lg text-sm text-gray-600 italic border-l-4 border-gray-200">
               "{{ d.details }}"
+            </div>
+            
+            <!-- Affichage des documents soumis -->
+            <div v-if="d.files && d.files.length > 0" class="mt-4">
+              <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Documents soumis par le citoyen</p>
+              <div class="flex flex-wrap gap-2">
+                <a 
+                  v-for="(file, index) in d.files" 
+                  :key="index"
+                  :href="'http://localhost:8000/storage/' + file"
+                  target="_blank"
+                  class="group relative w-20 h-20 rounded-xl overflow-hidden border border-gray-100 bg-gray-50 flex items-center justify-center hover:border-blue-300 transition-all"
+                >
+                  <i v-if="isImage(file)" class="fas fa-image text-gray-300 group-hover:text-blue-500 transition-colors"></i>
+                  <i v-else class="fas fa-file-pdf text-gray-300 group-hover:text-red-500 transition-colors"></i>
+                  <img v-if="isImage(file)" :src="'http://localhost:8000/storage/' + file" class="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <i class="fas fa-eye text-white text-xs"></i>
+                  </div>
+                </a>
+              </div>
             </div>
           </div>
         </div>
@@ -171,6 +208,8 @@ import { ref, onMounted, computed } from 'vue';
 import api from '../../api/axios';
 
 const items = ref([]);
+const loading = ref(false);
+const error = ref(null);
 const statusFilter = ref('en_attente');
 const processing = ref(false);
 
@@ -184,11 +223,20 @@ const directMessage = ref('');
 const uploadedFile = ref(null);
 
 const fetchDemandes = async () => {
+  loading.value = true;
+  error.value = null;
   try {
     const { data } = await api.get('/admin/etat-civil-requests');
-    items.value = data.data || [];
+    if (data.status) {
+      items.value = data.data || [];
+    } else {
+      error.value = data.message || "Erreur lors de la récupération des données";
+    }
   } catch (e) {
+    error.value = "Impossible de charger les demandes. Vérifiez votre connexion.";
     console.error(e);
+  } finally {
+    loading.value = false;
   }
 };
 
@@ -248,22 +296,32 @@ const submitDecision = async () => {
   }
 };
 
-const sendDirectMessage = async () => {
-  processing.value = true;
-  try {
-    // Simulation d'envoi de message (via API update ou une future table messages)
-    await api.put(`/admin/etat-civil-requests/${currentItem.value.id}`, {
-      details: currentItem.value.details + "\n\n[Admin]: " + directMessage.value
-    });
-    
-    alert('Message envoyé au client !');
-    showMessageModal.value = false;
-    fetchDemandes();
-  } catch (e) {
-    alert('Erreur lors de l\'envoi du message');
-  } finally {
-    processing.value = false;
-  }
+const isImage = (path) => {
+  if (!path) return false;
+  const ext = path.split('.').pop().toLowerCase();
+  return ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext);
+};
+
+const badgeClass = (status) => {
+  const base = 'text-[10px] px-2 py-0.5 rounded-full font-bold uppercase';
+  if (status === 'validé') return `${base} bg-emerald-100 text-emerald-700`;
+  if (status === 'rejeté') return `${base} bg-rose-100 text-rose-700`;
+  return `${base} bg-amber-100 text-amber-700`;
+};
+
+const typeIconClass = (type) => {
+  const base = 'bg-gray-100 text-gray-500';
+  if (type === 'naissance') return 'bg-blue-100 text-blue-600';
+  if (type === 'mariage') return 'bg-pink-100 text-pink-600';
+  if (type === 'deces') return 'bg-slate-100 text-slate-600';
+  return base;
+};
+
+const typeIcon = (type) => {
+  if (type === 'naissance') return 'fas fa-baby';
+  if (type === 'mariage') return 'fas fa-ring';
+  if (type === 'deces') return 'fas fa-dove';
+  return 'fas fa-file-contract';
 };
 
 const formatDate = (dateStr) => {
@@ -271,32 +329,26 @@ const formatDate = (dateStr) => {
   return new Date(dateStr).toLocaleDateString('fr-FR', {
     day: 'numeric',
     month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
+    year: 'numeric'
   });
 };
 
-const badgeClass = (status) => {
-  const base = 'px-2.5 py-1 rounded-lg font-bold text-[10px] tracking-wider';
-  if (status === 'validé') return `${base} bg-emerald-100 text-emerald-700`;
-  if (status === 'rejeté') return `${base} bg-rose-100 text-rose-700`;
-  return `${base} bg-amber-100 text-amber-700`;
-};
-
-const typeIconClass = (type) => {
-  const base = 'shadow-sm';
-  if (type === 'naissance') return `${base} bg-blue-100 text-blue-600`;
-  if (type === 'deces') return `${base} bg-gray-100 text-gray-600`;
-  if (type === 'mariage') return `${base} bg-pink-100 text-pink-600`;
-  return `${base} bg-purple-100 text-purple-600`;
-};
-
-const typeIcon = (type) => {
-  if (type === 'naissance') return 'fas fa-baby';
-  if (type === 'deces') return 'fas fa-dove';
-  if (type === 'mariage') return 'fas fa-ring';
-  return 'fas fa-file-signature';
+const sendDirectMessage = async () => {
+  if (!directMessage.value.trim()) return;
+  processing.value = true;
+  try {
+    await api.post('/notifications', {
+      user_id: currentItem.value.user_id,
+      message: directMessage.value,
+      title: 'Information sur votre demande ' + currentItem.value.reference
+    });
+    alert('Message envoyé avec succès !');
+    showMessageModal.value = false;
+  } catch (e) {
+    alert('Erreur lors de l\'envoi du message');
+  } finally {
+    processing.value = false;
+  }
 };
 </script>
 

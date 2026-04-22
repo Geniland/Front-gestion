@@ -16,6 +16,7 @@ import AdminPaiements from '../views/admin/Paiements.vue';
 import AdminEtatCivil from '../views/admin/EtatCivil.vue';
 import AdminActualites from '../views/admin/Actualites.vue';
 import AdminServices from '../views/admin/Services.vue';
+import AdminMessages from '../views/admin/Messages.vue';
 
 import auth from '../store/auth';
 
@@ -83,6 +84,7 @@ const routes = [
       { path: 'etat-civil', name: 'AdminEtatCivil', component: AdminEtatCivil, meta: { roles: ['super_admin', 'maire'] } },
       { path: 'actualites', name: 'AdminActualites', component: AdminActualites, meta: { roles: ['super_admin', 'maire'] } },
       { path: 'services', name: 'AdminServices', component: AdminServices, meta: { roles: ['super_admin', 'maire'] } },
+      { path: 'messages', name: 'AdminMessages', component: AdminMessages, meta: { roles: ['super_admin', 'maire'] } },
     ],
   },
 ];

@@ -12,13 +12,16 @@
         <div class="grid grid-cols-2 gap-4">
           <div>
             <label class="block text-sm text-gray-600 mb-1">Type de taxe</label>
-            <select v-model="form.type_taxe_id" class="w-full border rounded px-3 py-2" required>
+            <select v-model="form.type_taxe_id" @change="onTypeChange" class="w-full border rounded px-3 py-2" required>
               <option v-for="t in typeTaxes" :value="t.id" :key="t.id">{{ t.nom }}</option>
             </select>
           </div>
           <div>
             <label class="block text-sm text-gray-600 mb-1">Montant</label>
             <input v-model.number="form.montant" type="number" min="0" class="w-full border rounded px-3 py-2" required />
+            <div v-if="montantDifference" class="text-[10px] text-amber-600 font-bold mt-1">
+              <i class="fas fa-exclamation-triangle"></i> Montant différent du montant de base ({{ baseMontant }} F)
+            </div>
           </div>
         </div>
         <div class="grid grid-cols-2 gap-4">
@@ -89,7 +92,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import api from '../../api/axiosPublic';
+import apiPublic from '../../api/axiosPublic';
 import userAuth from '../../store/userAuth';
 
 const typeTaxes = ref([]);
@@ -107,6 +110,16 @@ const form = ref({
   periode_fin: '',
 });
 
+const selectedType = computed(() => typeTaxes.value.find(t => t.id === form.value.type_taxe_id));
+const baseMontant = computed(() => selectedType.value?.montant_defaut || 0);
+const montantDifference = computed(() => form.value.montant !== baseMontant.value && form.value.type_taxe_id);
+
+function onTypeChange() {
+  if (selectedType.value) {
+    form.value.montant = selectedType.value.montant_defaut || 0;
+  }
+}
+
 const taxesToPay = computed(() => {
   return taxes.value.filter(t => t.status === 'approuvee');
 });
@@ -114,7 +127,7 @@ const taxesToPay = computed(() => {
 const fetchTaxes = async () => {
   loadingHistory.value = true;
   try {
-    const response = await api.get('/public/taxes');
+    const response = await apiPublic.get('/public/taxes');
     taxes.value = response.data.data?.data || response.data.data || [];
   } catch (e) {
     console.error("Erreur chargement taxes", e);
@@ -127,7 +140,7 @@ const fetchTaxes = async () => {
 onMounted(async () => {
   try {
     const [typesRes] = await Promise.all([
-      api.get('/types-taxes'),
+      apiPublic.get('/types-taxes'),
     ]);
     typeTaxes.value = (typesRes.data.data?.data || typesRes.data.data || []);
     fetchTaxes();
@@ -152,7 +165,7 @@ function badgeClass(status) {
 async function createTaxe() {
   loading.value = true;
   try {
-    await api.post('/public/taxes', form.value);
+    await apiPublic.post('/public/taxes', form.value);
     alert('Taxe enregistrée en attente de validation');
     fetchTaxes();
   } catch (e) {
@@ -164,7 +177,7 @@ async function createTaxe() {
 
 async function initiatePayment() {
   try {
-    const { data } = await api.post('/public/payments/initiate', {
+    const { data } = await apiPublic.post('/public/payments/initiate', {
       taxe_id: selectedTaxeId.value,
     });
     if (data.checkout_url) {

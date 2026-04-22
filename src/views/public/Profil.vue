@@ -26,6 +26,10 @@
                 <i class="fas fa-envelope text-gray-400 w-5"></i>
                 <span>{{ user?.email }}</span>
               </div>
+              <div class="flex items-center gap-3 text-gray-700">
+                <i class="fas fa-phone text-gray-400 w-5"></i>
+                <span>{{ user?.phone || 'Non renseigné' }}</span>
+              </div>
             </div>
           </div>
           
@@ -85,7 +89,7 @@
 import { computed, ref, onMounted } from 'vue';
 import userAuth from '../../store/userAuth';
 import { useRouter } from 'vue-router';
-import api from '../../api/axios';
+import apiPublic from '../../api/axiosPublic';
 
 const router = useRouter();
 const user = computed(() => userAuth.user.value);
@@ -96,8 +100,8 @@ const loading = ref(true);
 async function fetchActivities() {
   try {
     const [taxesRes, requestsRes] = await Promise.all([
-      api.get('/public/taxes'),
-      api.get('/public/etat-civil/historique')
+      apiPublic.get('/public/taxes'),
+      apiPublic.get('/public/etat-civil/historique')
     ]);
 
     const taxes = taxesRes.data.data?.data || taxesRes.data.data || [];
