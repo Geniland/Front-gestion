@@ -48,6 +48,7 @@ const routes = [
       { path: 'taxes', name: 'Taxes', component: Taxes, meta: { requiresUser: true } },
       { path: 'etat-civil', name: 'EtatCivil', component: EtatCivil, meta: { requiresUser: true } },
       { path: 'ticket/verify/:reference', name: 'TicketVerify', component: TicketVerify },
+      { path: 'v/:hash', name: 'TicketVerifyPublic', component: TicketVerify },
       { path: 'login', name: 'UserLogin', component: UserLogin, meta: { guestUser: true } },
       { path: 'register', name: 'Register', component: Register, meta: { guestUser: true } },
       { path: 'forgot-password', name: 'ForgotPassword', component: ForgotPassword, meta: { guestUser: true } },

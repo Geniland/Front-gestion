@@ -44,17 +44,19 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import apiPublic from '../../api/axiosPublic';
+import axios from 'axios';
 
 const route = useRoute();
-const reference = route.params.reference;
-const status = ref('invalid');
+const hash = route.params.hash;
+const status = ref('loading');
 const ticket = ref(null);
 const loading = ref(true);
 
 const verifyTicket = async () => {
   try {
-    const { data } = await apiPublic.get(`/public/tickets/verify/${reference}`);
+    // On utilise l'URL relative ou absolue basée sur l'URL actuelle
+    // L'API est servie par Laravel sur le même domaine
+    const { data } = await axios.get(`/api/v/${hash}`);
     status.value = data.status;
     ticket.value = data.ticket;
   } catch (e) {
