@@ -136,7 +136,7 @@
                 <label>Description</label>
                 <textarea v-model="form.description" rows="3" placeholder="Description courte du type de taxe..."></textarea>
               </div>
-              <div class="form-group">
+              <div class="form-group" v-if="isSuperAdmin">
                 <label>Commune</label>
                 <select v-model="form.commune_id" required>
                   <option value="">Sélectionner une commune</option>
@@ -178,8 +178,9 @@
 </template>
 
 <script>
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, onMounted, computed } from 'vue';
 import api from '../api/axios';
+import auth from '../store/auth';
 
 export default {
   name: 'TypeTaxes',
@@ -193,6 +194,8 @@ export default {
     const showModal = ref(false);
     const isEditing = ref(false);
     const currentId = ref(null);
+
+    const isSuperAdmin = computed(() => auth.user.value?.role === 'super_admin');
 
     const form = reactive({
       commune_id: '',
@@ -244,13 +247,18 @@ export default {
         currentId.value = null;
         form.nom = '';
         form.description = '';
-        form.commune_id = '';
         form.montant_base = 0;
         form.periode = 'mensuel';
         form.actif = true;
+        
+        if (!isSuperAdmin.value && auth.user.value?.commune_id) {
+          form.commune_id = auth.user.value.commune_id;
+        } else {
+          form.commune_id = '';
+        }
       }
       showModal.value = true;
-      if (communes.value.length === 0) fetchCommunes();
+      if (isSuperAdmin.value && communes.value.length === 0) fetchCommunes();
     };
 
     const closeModal = () => {

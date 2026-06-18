@@ -61,9 +61,12 @@ async login(credentials) {
     if (!state.token) return;
     try {
       const response = await api.get('/profile');
-      state.user = response.data;
+      //console.log('fetchProfile response:', response.data);
+      // The API returns { success: true, agent: ... }
+      state.user = response.data.agent;
       localStorage.setItem('user', JSON.stringify(state.user));
     } catch (error) {
+      console.error('fetchProfile failed:', error);
       this.logout();
     }
   }

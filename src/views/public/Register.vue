@@ -5,6 +5,12 @@
       <input v-model="nom" placeholder="Nom complet" class="w-full border rounded px-3 py-2" required />
       <input v-model="email" type="email" placeholder="Email" class="w-full border rounded px-3 py-2" required />
       <input v-model="telephone" placeholder="Téléphone" class="w-full border rounded px-3 py-2" required />
+      <select v-model="commune_id" class="w-full border rounded px-3 py-2" required>
+        <option value="" disabled>Sélectionnez votre commune</option>
+        <option v-for="commune in communes" :key="commune.id" :value="commune.id">
+          {{ commune.nom }}
+        </option>
+      </select>
       <input v-model="password" type="password" placeholder="Mot de passe (min 8 car.)" class="w-full border rounded px-3 py-2" required />
       <input v-model="password_confirmation" type="password" placeholder="Confirmer le mot de passe" class="w-full border rounded px-3 py-2" required />
       <div v-if="error" class="text-red-500 text-sm">{{ error }}</div>
@@ -19,18 +25,34 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import userAuth from '../../store/userAuth';
 import { useRouter } from 'vue-router';
+import apiPublic from '../../api/axiosPublic';
 
 const router = useRouter();
 const nom = ref('');
 const email = ref('');
 const telephone = ref('');
+const commune_id = ref('');
 const password = ref('');
 const password_confirmation = ref('');
 const error = ref('');
 const loading = ref(false);
+const communes = ref([]);
+
+async function fetchCommunes() {
+  try {
+    const response = await apiPublic.get('/public/communes');
+    communes.value = response.data.data || [];
+  } catch (e) {
+    console.error('Erreur lors de la récupération des communes', e);
+  }
+}
+
+onMounted(() => {
+  fetchCommunes();
+});
 
 async function submit() {
   if (password.value !== password_confirmation.value) {
@@ -51,6 +73,7 @@ async function submit() {
       name: nom.value,
       email: email.value,
       phone: telephone.value,
+      commune_id: commune_id.value,
       password: password.value,
       password_confirmation: password_confirmation.value, 
     });

@@ -12,15 +12,15 @@
           </router-link>
         </li>
         
-        <template v-if="isSuperAdmin">
+        <template v-if="isSuperAdmin || isMaire">
           <li class="section-title text-xs font-bold text-gray-400 mt-6 mb-2 px-2 uppercase tracking-widest">Gestion Administrative</li>
           
-          <li :class="{ active: $route.name === 'Communes' }">
+          <li v-if="isSuperAdmin" :class="{ active: $route.name === 'Communes' }">
             <router-link to="/admin/communes">
               <i class="fas fa-city"></i> Communes
             </router-link>
           </li>
-          <li :class="{ active: $route.name === 'Quartiers' }">
+          <li v-if="isSuperAdmin" :class="{ active: $route.name === 'Quartiers' }">
             <router-link to="/admin/quartiers">
               <i class="fas fa-map-marker-alt"></i> Quartiers
             </router-link>
@@ -38,6 +38,7 @@
         </template>
 
         <template v-if="isSuperAdmin || isMaire">
+          
           <li class="section-title text-xs font-bold text-gray-400 mt-6 mb-2 px-2 uppercase tracking-widest">Approbations Clients</li>
           
           <li :class="{ active: $route.name === 'AdminContribuables' }">

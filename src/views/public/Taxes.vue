@@ -171,39 +171,54 @@
         <div
           v-for="t in taxes"
           :key="t.id"
-          class="p-4 flex items-center justify-between hover:bg-gray-50 transition"
+          class="p-4 hover:bg-gray-50 transition"
         >
-          <div>
-            <div class="font-bold text-gray-800">
-              {{ t.type_taxe?.nom || "Taxe sans nom" }}
+          <div class="flex items-start justify-between gap-4">
+            <div class="flex-1">
+              <div class="font-bold text-gray-800">
+                {{ t.type_taxe?.nom || "Taxe sans nom" }}
+              </div>
+
+              <div class="text-sm text-gray-500">
+                <span class="mr-3">
+                  <i class="fas fa-money-bill-wave mr-1"></i> {{ t.montant }} F
+                </span>
+                <span>
+                  <i class="far fa-calendar-alt mr-1"></i> {{ formatDate(t.created_at) }}
+                </span>
+              </div>
+
+              <div class="text-xs text-gray-400 mt-1">
+                Réf: {{ t.reference }}
+              </div>
+
+              <div
+                v-if="t.commentaire_admin"
+                class="mt-2 p-2 bg-amber-50 text-amber-700 text-[10px] rounded-lg border border-amber-100 flex items-start gap-2"
+              >
+                <i class="fas fa-info-circle mt-0.5"></i>
+                <span>{{ t.commentaire_admin }}</span>
+              </div>
+              
+              <!-- Bouton de téléchargement du ticket -->
+              <div v-if="t.ticket" class="mt-3">
+                <a 
+                  :href="`/v/${t.ticket.qr_hash}`" 
+                  target="_blank" 
+                  rel="noopener"
+                  class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 transition"
+                >
+                  <i class="fas fa-receipt"></i>
+                  Voir le Ticket #{{ t.ticket.numero_ticket }}
+                </a>
+              </div>
             </div>
 
-            <div class="text-sm text-gray-500">
-              <span class="mr-3">
-                <i class="fas fa-money-bill-wave mr-1"></i> {{ t.montant }} F
+            <div class="flex items-center gap-3">
+              <span :class="badgeClass(t.status)">
+                {{ t.status }}
               </span>
-              <span>
-                <i class="far fa-calendar-alt mr-1"></i> {{ formatDate(t.created_at) }}
-              </span>
             </div>
-
-            <div class="text-xs text-gray-400 mt-1">
-              Réf: {{ t.reference }}
-            </div>
-
-            <div
-              v-if="t.commentaire_admin"
-              class="mt-2 p-2 bg-amber-50 text-amber-700 text-[10px] rounded-lg border border-amber-100 flex items-start gap-2"
-            >
-              <i class="fas fa-info-circle mt-0.5"></i>
-              <span>{{ t.commentaire_admin }}</span>
-            </div>
-          </div>
-
-          <div class="flex items-center gap-3">
-            <span :class="badgeClass(t.status)">
-              {{ t.status }}
-            </span>
           </div>
         </div>
       </div>
@@ -304,7 +319,7 @@ async function fetchTaxes() {
 }
 
 // Fonction pour vérifier les paramètres du callback
-function checkPaymentCallback() {
+async function checkPaymentCallback() {
   // Utiliser route.query si vous utilisez vue-router
   // OU window.location.search si vous n'utilisez pas vue-router
   const query = route.query || Object.fromEntries(new URLSearchParams(window.location.search));
@@ -320,7 +335,9 @@ function checkPaymentCallback() {
     
     switch(paymentStatus) {
       case 'success':
-        successMessage.value = "✓ Votre paiement a été effectué avec succès ! La taxe sera bientôt validée.";
+        successMessage.value = "✓ Votre paiement a été effectué avec succès ! Votre ticket est prêt.";
+        // Recharger les taxes pour afficher le bouton du ticket
+        await fetchTaxes();
         break;
       case 'failed':
         errorMessage.value = "✗ Le paiement a échoué. Veuillez réessayer ou contacter le support.";
@@ -339,7 +356,9 @@ function checkPaymentCallback() {
         break;
       default:
         if (paymentStatus === 'approved') {
-          successMessage.value = "✓ Paiement confirmé avec succès !";
+          successMessage.value = "✓ Paiement confirmé avec succès ! Votre ticket est prêt.";
+          // Recharger les taxes pour afficher le bouton du ticket
+          await fetchTaxes();
         } else if (paymentStatus === 'canceled' || paymentStatus === 'declined') {
           errorMessage.value = "Le paiement a été annulé.";
         }

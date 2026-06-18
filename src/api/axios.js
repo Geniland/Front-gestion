@@ -25,7 +25,10 @@ api.interceptors.request.use(config => {
 let isSessionExpiredAlertShown = false;
 
 api.interceptors.response.use(response => response, error => {
-  if (error.response && error.response.status === 401) {
+  // Ne pas traiter les 401 pour les endpoints de login
+  const isLoginEndpoint = error.config?.url?.includes('/login');
+  
+  if (error.response && error.response.status === 401 && !isLoginEndpoint) {
     // Éviter les alertes multiples
     if (!isSessionExpiredAlertShown) {
       isSessionExpiredAlertShown = true;

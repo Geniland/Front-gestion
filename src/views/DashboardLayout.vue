@@ -13,6 +13,8 @@
 <script>
 import Sidebar from '../components/layout/Sidebar.vue';
 import TopBar from '../components/layout/TopBar.vue';
+import { onMounted } from 'vue';
+import auth from '../store/auth';
 
 export default {
   name: 'DashboardLayout',
@@ -20,6 +22,12 @@ export default {
     Sidebar,
     TopBar,
   },
+  setup() {
+    onMounted(async () => {
+      // console.log('DashboardLayout mounted, fetching profile...');
+      await auth.fetchProfile();
+    });
+  }
 };
 </script>
 

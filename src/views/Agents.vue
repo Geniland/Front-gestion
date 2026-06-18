@@ -158,17 +158,17 @@
               </div>
               <div class="form-group">
                 <label>Commune</label>
-                <select v-model="form.commune_id" required>
+                <select v-model="form.commune_id" :disabled="!isSuperAdmin" required>
                   <option value="">Sélectionner une commune</option>
-                  <option v-for="c in communes" :key="c.id" :value="c.id">{{ c.nom }}</option>
+                  <option v-for="c in communes" :key="c.id" :value="c.id">{{ c.id }} - {{ c.nom }}</option>
                 </select>
               </div>
               <div class="form-group">
                 <label>Rôle</label>
                 <select v-model="form.role" required>
                   <option value="agent">Agent</option>
-                  <option value="maire">Maire</option>
-                  <option value="super_admin">Super Admin</option>
+                  <option value="maire" v-if="isSuperAdmin">Maire</option>
+                  <option value="super_admin" v-if="isSuperAdmin">Super Admin</option>
                 </select>
               </div>
               <div class="form-group">
@@ -195,8 +195,9 @@
 </template>
 
 <script>
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, onMounted, computed } from 'vue';
 import api from '../api/axios';
+import auth from '../store/auth';
 
 export default {
   name: 'Agents',
@@ -210,6 +211,16 @@ export default {
     const showModal = ref(false);
     const isEditing = ref(false);
     const currentId = ref(null);
+
+    const isSuperAdmin = computed(() => {
+      const result = auth.user.value?.role === 'super_admin';
+      // console.log('isSuperAdmin check:', { 
+      //   user: auth.user.value, 
+      //   role: auth.user.value?.role, 
+      //   result 
+      // });
+      return result;
+    });
 
     const form = reactive({
       commune_id: '',
@@ -238,9 +249,12 @@ export default {
 
     const fetchCommunes = async () => {
       try {
-        const response = await api.get('/communes'); // On suppose une route pour lister toutes les communes
+        const response = await api.get('/communes');
+        // console.log('fetchCommunes response:', response.data);
         if (response.data.status) {
-          communes.value = response.data.data.data || response.data.data;
+          // Sometimes it's response.data.data (paginated), sometimes just response.data.data
+          communes.value = response.data.data?.data || response.data.data || [];
+          // console.log('communes loaded:', communes.value);
         }
       } catch (error) {
         console.error('Erreur lors du chargement des communes', error);
@@ -264,13 +278,17 @@ export default {
         form.nom = '';
         form.email = '';
         form.telephone = '';
-        form.commune_id = '';
         form.role = 'agent';
         form.password = '';
         form.password_confirmation = '';
+        
+        if (!isSuperAdmin.value && auth.user.value?.commune_id) {
+          form.commune_id = auth.user.value.commune_id;
+        } else {
+          form.commune_id = '';
+        }
       }
       showModal.value = true;
-      if (communes.value.length === 0) fetchCommunes();
     };
 
     const closeModal = () => {
@@ -405,7 +423,8 @@ export default {
       unblockAgent,
       getRoleClass,
       formatRole,
-      formatDate
+      formatDate,
+      isSuperAdmin
     };
   }
 };

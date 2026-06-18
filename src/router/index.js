@@ -72,8 +72,8 @@ const routes = [
     children: [
       { path: '', name: 'Dashboard', component: Dashboard },
       { path: 'communes', name: 'Communes', component: Communes, meta: { roles: ['super_admin'] } },
-      { path: 'agents', name: 'Agents', component: Agents, meta: { roles: ['super_admin'] } },
-      { path: 'types-taxes', name: 'TypeTaxes', component: TypeTaxes, meta: { roles: ['super_admin'] } },
+      { path: 'agents', name: 'Agents', component: Agents, meta: { roles: ['super_admin', 'maire'] } },
+      { path: 'types-taxes', name: 'TypeTaxes', component: TypeTaxes, meta: { roles: ['super_admin', 'maire'] } },
       { path: 'quartiers', name: 'Quartiers', component: Quartiers, meta: { roles: ['super_admin'] } },
       { path: 'paiements', name: 'Paiements', component: Paiements, meta: { roles: ['super_admin', 'maire'] } },
       { path: 'settings', name: 'Settings', component: Settings, meta: { roles: ['super_admin'] } },

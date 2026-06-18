@@ -11,4 +11,15 @@ apiPublic.interceptors.request.use(config => {
   return config;
 });
 
+apiPublic.interceptors.response.use(
+  response => response,
+  error => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('site_token');
+      localStorage.removeItem('site_user');
+    }
+    return Promise.reject(error);
+  }
+);
+
 export default apiPublic;

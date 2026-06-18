@@ -5,6 +5,7 @@
 <script>
 import L from "leaflet";
 import api from "../../api/axios";
+import auth from "../../store/auth";
 
 export default {
   name: "QuartierMap",
@@ -31,7 +32,19 @@ export default {
         const res = await api.get("/quartiers");
         const quartiers = res.data.data?.data || res.data.data || [];
 
-        this.map = L.map(container).setView([6.1725, 1.2314], 12);
+        // Définir la position initiale de la carte
+        let centerLat = 6.1725;
+        let centerLng = 1.2314;
+        let zoom = 12;
+        
+        // Si on a des quartiers filtrés, centrer sur le premier
+        if (quartiers.length > 0 && quartiers[0].latitude && quartiers[0].longitude) {
+          centerLat = quartiers[0].latitude;
+          centerLng = quartiers[0].longitude;
+          zoom = 14;
+        }
+
+        this.map = L.map(container).setView([centerLat, centerLng], zoom);
 
         L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
           attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
@@ -62,7 +75,7 @@ export default {
     if (this.map) {
       this.map.remove();
     }
-  }
+  },
 };
 </script>
 
