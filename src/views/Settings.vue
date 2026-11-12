@@ -67,14 +67,53 @@
             </section>
           </div>
 
-          <!-- SECTION SÉCURITÉ & LOGS - Version avec effet de survol et état actif -->
+          <!-- SECTION SÉCURITÉ & LOGS - Version avec filtres et détails -->
 <div v-else-if="activeTab === 'security'" key="security" class="tab-pane">
   <section class="settings-section">
     <h3><i class="fas fa-history"></i> Audit Logs (Journaux d'activité)</h3>
+    
+    <!-- Filtres -->
+    <div class="filters-grid mb-6">
+      <div class="form-group">
+        <label>Module</label>
+        <select v-model="filters.module" @change="applyFilters">
+          <option value="">Tous les modules</option>
+          <option value="budget">Budgets</option>
+          <option value="depense">Dépenses</option>
+          <option value="tresorerie">Trésorerie</option>
+          <option value="settings">Paramètres</option>
+          <option value="users">Utilisateurs</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Type d'action</label>
+        <select v-model="filters.type" @change="applyFilters">
+          <option value="">Tous les types</option>
+          <option value="create">Création</option>
+          <option value="update">Mise à jour</option>
+          <option value="delete">Suppression</option>
+          <option value="login">Connexion</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Date début</label>
+        <input type="date" v-model="filters.start_date" @change="applyFilters" />
+      </div>
+      <div class="form-group">
+        <label>Date fin</label>
+        <input type="date" v-model="filters.end_date" @change="applyFilters" />
+      </div>
+      <div class="form-group">
+        <label>&nbsp;</label>
+        <button @click="resetFilters" class="btn-outline" style="width: 100%;">Réinitialiser</button>
+      </div>
+    </div>
+    
     <div class="table-container">
       <table class="audit-table">
         <thead>
           <tr>
+            <th style="width: 40px;"></th>
             <th>Utilisateur</th>
             <th>Action</th>
             <th>Module</th>
@@ -83,25 +122,38 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="log in auditLogs" :key="log.id" class="audit-row">
-            <td>
-              <div class="user-cell">
-                <div class="avatar-xs">{{ log.user ? log.user.charAt(0).toUpperCase() : '?' }}</div>
-                <span>{{ log.user || 'Système' }}</span>
-              </div>
-            </td>
-            <td>
-              <span class="badge-action" :class="log.type?.toLowerCase() || 'default'">
-                {{ log.action }}
-              </span>
-            </td>
-            <td>{{ log.module || '-' }}</td>
-            <td>{{ formatDate(log.date) }}</td>
-            <td class="ip-cell">{{ log.ip || 'N/A' }}</td>
-          </tr>
+          <template v-for="log in auditLogs" :key="log.id">
+            <tr class="audit-row" @click="toggleLogDetails(log.id)">
+              <td style="padding: 8px;">
+                <i :class="expandedLogs.includes(log.id) ? 'fas fa-chevron-down' : 'fas fa-chevron-right'" class="text-gray-400"></i>
+              </td>
+              <td>
+                <div class="user-cell">
+                  <div class="avatar-xs">{{ log.user ? log.user.charAt(0).toUpperCase() : '?' }}</div>
+                  <span>{{ log.user || 'Système' }}</span>
+                </div>
+              </td>
+              <td>
+                <span class="badge-action" :class="log.type?.toLowerCase() || 'default'">
+                  {{ log.action }}
+                </span>
+              </td>
+              <td>{{ log.module || '-' }}</td>
+              <td>{{ formatDate(log.date) }}</td>
+              <td class="ip-cell">{{ log.ip || 'N/A' }}</td>
+            </tr>
+            <tr v-if="expandedLogs.includes(log.id)" class="details-row">
+              <td colspan="6">
+                <div class="details-panel">
+                  <h4 class="mb-2 font-bold">Détails de l'action :</h4>
+                  <pre class="bg-gray-50 p-4 rounded-lg text-sm text-gray-700 overflow-x-auto">{{ JSON.stringify(log.details, null, 2) }}</pre>
+                </div>
+              </td>
+            </tr>
+          </template>
           <!-- Message si pas de logs -->
           <tr v-if="!auditLogs?.length">
-            <td colspan="5" class="text-center py-4" style="color: #64748b;">
+            <td colspan="6" class="text-center py-4" style="color: #64748b;">
               Aucun journal d'activité disponible
             </td>
           </tr>
@@ -295,6 +347,13 @@ export default {
     });
 
     const auditLogs = ref([]);
+    const expandedLogs = ref([]);
+    const filters = ref({
+      module: '',
+      type: '',
+      start_date: '',
+      end_date: '',
+    });
 
     const fetchSettings = async () => {
       try {
@@ -312,10 +371,39 @@ export default {
 
     const fetchAuditLogs = async () => {
       try {
-        const response = await api.get('/audit-logs');
+        const params = {};
+        if (filters.value.module) params.module = filters.value.module;
+        if (filters.value.type) params.type = filters.value.type;
+        if (filters.value.start_date) params.start_date = filters.value.start_date;
+        if (filters.value.end_date) params.end_date = filters.value.end_date;
+        
+        const response = await api.get('/audit-logs', { params });
         auditLogs.value = response.data;
       } catch (error) {
         console.error('Erreur lors du chargement des logs d\'audit:', error);
+      }
+    };
+
+    const applyFilters = () => {
+      fetchAuditLogs();
+    };
+
+    const resetFilters = () => {
+      filters.value = {
+        module: '',
+        type: '',
+        start_date: '',
+        end_date: '',
+      };
+      fetchAuditLogs();
+    };
+
+    const toggleLogDetails = (logId) => {
+      const index = expandedLogs.value.indexOf(logId);
+      if (index > -1) {
+        expandedLogs.value.splice(index, 1);
+      } else {
+        expandedLogs.value.push(logId);
       }
     };
 
@@ -405,6 +493,8 @@ export default {
       tabs,
       settings,
       auditLogs,
+      expandedLogs,
+      filters,
       saving,
       backingUp,
       selectedTemplate,
@@ -414,7 +504,10 @@ export default {
       getLogoUrl,
       saveAllSettings,
       downloadBackup,
-      formatDate
+      formatDate,
+      applyFilters,
+      resetFilters,
+      toggleLogDetails
     };
   }
 };
@@ -620,7 +713,23 @@ export default {
   border: 1px solid #f1f5f9;
 }
 
-.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
+.form-grid, .filters-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr; gap: 15px; }
+
+@media (max-width: 1024px) {
+  .filters-grid { grid-template-columns: 1fr 1fr 1fr; }
+}
+
+@media (max-width: 768px) {
+  .filters-grid { grid-template-columns: 1fr 1fr; }
+}
+
+.details-row {
+  background-color: #f8fafc;
+}
+
+.details-panel {
+  padding: 16px;
+}
 .form-group { display: flex; flex-direction: column; gap: 10px; }
 .form-group.full { grid-column: span 2; }
 .form-group label { font-size: 14px; font-weight: 600; color: #475569; }

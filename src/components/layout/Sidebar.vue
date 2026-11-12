@@ -69,6 +69,36 @@
         </template>
 
         <template v-if="isSuperAdmin || isMaire">
+          <li class="section-title text-xs font-bold text-gray-400 mt-6 mb-2 px-2 uppercase tracking-widest">Gestion Financière</li>
+          
+          <li :class="{ active: $route.name === 'CategoriesDepenses' }">
+            <router-link to="/admin/categories-depenses">
+              <i class="fas fa-folder"></i> Catégories Dépenses
+            </router-link>
+          </li>
+          <li :class="{ active: $route.name === 'Budgets' }">
+            <router-link to="/admin/budgets">
+              <i class="fas fa-calculator"></i> Budgets
+            </router-link>
+          </li>
+          <li :class="{ active: $route.name === 'Depenses' }">
+            <router-link to="/admin/depenses">
+              <i class="fas fa-credit-card"></i> Dépenses
+            </router-link>
+          </li>
+          <li :class="{ active: $route.name === 'CompteBancaires' }">
+            <router-link to="/admin/compte-bancaires">
+              <i class="fas fa-university"></i> Comptes Bancaires
+            </router-link>
+          </li>
+          <li :class="{ active: $route.name === 'EtatsFinanciers' }">
+            <router-link to="/admin/etats-financiers">
+              <i class="fas fa-chart-pie"></i> États Financiers
+            </router-link>
+          </li>
+        </template>
+
+        <template v-if="isSuperAdmin || isMaire">
           <li class="section-title text-xs font-bold text-gray-400 mt-6 mb-2 px-2 uppercase tracking-widest">Contenu & Site</li>
           
           <li :class="{ active: $route.name === 'AdminActualites' }">

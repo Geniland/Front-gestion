@@ -17,6 +17,11 @@ import AdminEtatCivil from '../views/admin/EtatCivil.vue';
 import AdminActualites from '../views/admin/Actualites.vue';
 import AdminServices from '../views/admin/Services.vue';
 import AdminMessages from '../views/admin/Messages.vue';
+import Budgets from '../views/admin/Budgets.vue';
+import CategoriesDepenses from '../views/admin/CategoriesDepenses.vue';
+import Depenses from '../views/admin/Depenses.vue';
+import CompteBancaires from '../views/admin/CompteBancaires.vue';
+import EtatsFinanciers from '../views/admin/EtatsFinanciers.vue';
 
 import auth from '../store/auth';
 
@@ -86,6 +91,11 @@ const routes = [
       { path: 'actualites', name: 'AdminActualites', component: AdminActualites, meta: { roles: ['super_admin', 'maire'] } },
       { path: 'services', name: 'AdminServices', component: AdminServices, meta: { roles: ['super_admin', 'maire'] } },
       { path: 'messages', name: 'AdminMessages', component: AdminMessages, meta: { roles: ['super_admin', 'maire'] } },
+      { path: 'categories-depenses', name: 'CategoriesDepenses', component: CategoriesDepenses, meta: { roles: ['super_admin', 'maire'] } },
+      { path: 'budgets', name: 'Budgets', component: Budgets, meta: { roles: ['super_admin', 'maire'] } },
+      { path: 'depenses', name: 'Depenses', component: Depenses, meta: { roles: ['super_admin', 'maire'] } },
+      { path: 'compte-bancaires', name: 'CompteBancaires', component: CompteBancaires, meta: { roles: ['super_admin', 'maire'] } },
+      { path: 'etats-financiers', name: 'EtatsFinanciers', component: EtatsFinanciers, meta: { roles: ['super_admin', 'maire'] } },
     ],
   },
 ];
